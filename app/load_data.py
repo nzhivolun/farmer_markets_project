@@ -39,13 +39,19 @@ def load_data():
         cur = conn.cursor() # создает курсор: Курсор позволяет выполнять SQL-запросы и получать результаты
 
         # === Шаг 2. Список категорий (берём из CSV колонок с Y/N) ===
-        categories_list = [
-            "Bakedgoods", "Cheese", "Crafts", "Flowers", "Eggs", "Seafood",
-            "Herbs", "Vegetables", "Honey", "Jams", "Maple", "Meat",
-            "Nursery", "Nuts", "Plants", "Poultry", "Prepared", "Soap",
-            "Trees", "Wine", "Coffee", "Beans", "Fruits", "Grains",
-            "Juices", "Mushrooms", "PetFood", "Tofu", "WildHarvested"
-        ]
+        # categories_list = [
+        #     "Bakedgoods", "Cheese", "Crafts", "Flowers", "Eggs", "Seafood",
+        #     "Herbs", "Vegetables", "Honey", "Jams", "Maple", "Meat",
+        #     "Nursery", "Nuts", "Plants", "Poultry", "Prepared", "Soap",
+        #     "Trees", "Wine", "Coffee", "Beans", "Fruits", "Grains",
+        #     "Juices", "Mushrooms", "PetFood", "Tofu", "WildHarvested"
+        # ]
+
+        # === Шаг 2. Список категорий (берём из CSV колонок с Y/N) ===
+        categories_list = []
+        with open (CSV_FILE, 'r') as file:
+            line = file.readline()
+            categories_list = line.split(",")[28:-2]
 
         # === Шаг 3. Проверяем, есть ли категории в таблице categories ===
         cur.execute("SELECT COUNT(*) FROM categories")
