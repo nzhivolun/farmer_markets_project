@@ -55,9 +55,9 @@ def paginate(offset, per_page, total=None):
     if total is not None:
         total_pages = math.ceil(total / per_page)
         current_page = offset // per_page + 1
-        print(f"\n📄 Страница {current_page} из {total_pages}")
+        print(f"\nСтраница {current_page} из {total_pages}")
     else:
-        print("\n📄 Переход между страницами:")
+        print("\nПереход между страницами:")
 
     print("[<<] Первая | [+] Следующая | [-] Предыдущая | [>>] Последняя | [число] Перейти | [0] Меню")
 

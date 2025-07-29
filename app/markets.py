@@ -111,11 +111,11 @@ def show_market_details():
     print(f"Other: {d['other_media']}")
 
     print("\nОтзывы:")
-    reviews = execute_query("SELECT user_name, rating, review_text FROM reviews WHERE market_id = %s",
+    reviews = execute_query("SELECT id, user_name, rating, review_text FROM reviews WHERE market_id = %s",
                              (market_id,), fetch=True)
     if reviews:
         for r in reviews:
-            print(f"{r['user_name']} ({r['rating']}): {r['review_text']}")
+            print(f"[{r['id']}] {r['user_name']} ({r['rating']}): {r['review_text']}")
     else:
         print("Нет отзывов.")
 

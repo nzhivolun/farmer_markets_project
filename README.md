@@ -18,7 +18,7 @@
 
 ---
 
-## 🛠 Требования
+## Требования
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) (Windows, macOS)
 - [Docker Engine + Compose](https://docs.docker.com/engine/install/) (Linux)
 
@@ -52,7 +52,7 @@ farmer_db (PostgreSQL)
 Для остановки контейнеров выполните: docker-compose down
 
 
-📂 Структура проекта
+Структура проекта
 
 farmer_markets_project/
 ├── app/
@@ -114,7 +114,7 @@ farmer_markets_project/
 
 
 Пагинация:
-[+] Следующая | [-] Предыдущая | [0] В меню
+[<<] Первая | [+] Следующая | [-] Предыдущая | [>>] Последняя | [число] Перейти | [0] Меню
 
 
 Полезные команды
@@ -125,3 +125,4 @@ docker system prune -af
 docker volume prune -f
 docker-compose up --build
 Или запустить батник на windows, .sh на Linux и MacOS
+Так же можно запустить программу в Limux на Windows, через wsl
