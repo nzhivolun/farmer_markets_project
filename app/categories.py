@@ -1,4 +1,5 @@
 from .db import execute_query  # импортируем функцию для работы с БД
+from .utils import paginate
 
 def show_markets_by_category():
     """
@@ -40,6 +41,14 @@ def show_markets_by_category():
         # === Пагинация ===
         per_page = 20  # количество рынков на странице
         offset = 0
+        
+        count_query = """
+            SELECT COUNT(*) FROM markets m
+            JOIN market_categories mc ON mc.market_id = m.id
+            WHERE mc.category_id = %s
+        """
+        total = execute_query(count_query, (category_id,), fetch=True)[0]['count']
+
 
         while True:
             query = """
@@ -58,32 +67,19 @@ def show_markets_by_category():
                     print("Нет рынков для этой категории.")
                 else:
                     print("Больше данных нет.")
-                command = input("[-] Назад | [0] В меню категорий: ").strip().lower()
-                if command == "-":
-                    offset -= per_page
-                    if offset < 0:
-                        offset = 0
-                elif command == "0":
-                    break
-                continue
+                offset = 0  # <=== ДОБАВЬ ЭТУ СТРОКУ
+                break
+
+
 
             # Заголовок страницы
             print(f"\n=== Рынки (категория: {category_name}) с {offset + 1} по {offset + len(results)} ===")
             for r in results:
                 print(f"{r['id']}. {r['name']} ({r['city']}, {r['state']})")
 
-            print("======================")
-            print("[+] Следующая | [-] Предыдущая | [0] В меню категорий")
-
-            command = input("Ваш выбор: ").strip().lower()
-            if command == "+":
-                offset += per_page
-            elif command == "-":
-                offset -= per_page
-                if offset < 0:
-                    offset = 0
-            elif command == "0":
+            # Меню перехода между страницами
+            offset = paginate(offset, per_page, total)
+            if offset is None:
                 break
-            else:
-                print("Неверная команда.")
+
 

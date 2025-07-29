@@ -18,6 +18,10 @@ from .utils import validate_id, validate_coordinates, paginate  # общие ф�
 def show_markets():
     per_page = 20
     offset = 0
+    # Получаем общее количество рынков
+    count_query = "SELECT COUNT(*) FROM markets"
+    total = execute_query(count_query, fetch=True)[0]['count']
+
 
     while True:
         query = """
@@ -34,24 +38,19 @@ def show_markets():
         results = execute_query(query, (per_page, offset), fetch=True)
 
         if not results:
-            offset = paginate(results, offset, per_page)
-            if offset is None:
-                break
-            continue
+            print("Больше данных нет.")
+            break  # выходим в меню
+
 
         print(f"\n=== Список рынков (с {offset + 1} по {offset + len(results)}) ===")
         for r in results:
             print(f"{r['id']}. {r['name']} ({r['city']}, {r['state']}) "
                   f"- Рейтинг: {round(r['avg_rating'], 1)} | Отзывов: {r['review_count']}")
 
-        print("[+] Следующие | [-] Предыдущие | [0] Меню")
-        cmd = input("Ваш выбор: ").strip()
-        if cmd == "+":
-            offset += per_page
-        elif cmd == "-":
-            offset = max(0, offset - per_page)
-        elif cmd == "0":
+        offset = paginate(offset, per_page, total)
+        if offset is None:
             break
+
 
 
 # ===========================================================
@@ -138,6 +137,10 @@ def sort_markets():
 
     per_page = 20
     offset = 0
+    # Получаем общее количество строк для сортировки
+    total_query = "SELECT COUNT(*) FROM markets"
+    total = execute_query(total_query, fetch=True)[0]['count']
+
 
     if choice == "1":
         order_clause = f"ORDER BY avg_rating {direction}"
@@ -185,6 +188,12 @@ def sort_markets():
             else:
                 print("Повторите ввод координат.\n")
 
+        count_query = """
+            SELECT COUNT(*) FROM markets
+            WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+        """
+        total = execute_query(count_query, fetch=True)[0]['count']
+
         order_clause = f"ORDER BY distance {direction}"
         query_template = f"""
             SELECT m.id, m.name, l.city, l.state,
@@ -195,19 +204,18 @@ def sort_markets():
             )) AS distance
             FROM markets m
             JOIN locations l ON m.location_id = l.id
+            WHERE m.latitude IS NOT NULL AND m.longitude IS NOT NULL
             {{order}}
             LIMIT %s OFFSET %s
         """
-
 
     while True:
         query = query_template.format(order=order_clause)
         results = execute_query(query, (per_page, offset), fetch=True)
         if not results:
-            offset = paginate(results, offset, per_page)
-            if offset is None:
-                break
-            continue
+            print("Больше данных нет.")
+            break
+
 
         for r in results:
             if "avg_rating" in r:
@@ -217,13 +225,10 @@ def sort_markets():
             else:
                 print(f"{r['id']}. {r['name']} ({r['city']}, {r['state']})")
 
-        cmd = input("[+] Следующие | [-] Предыдущие | [0] Меню: ").strip()
-        if cmd == "+":
-            offset += per_page
-        elif cmd == "-":
-            offset = max(0, offset - per_page)
-        elif cmd == "0":
+        offset = paginate(offset, per_page, total)
+        if offset is None:
             break
+
 
 
 # ===========================================================

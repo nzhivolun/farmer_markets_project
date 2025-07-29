@@ -2,6 +2,7 @@
 # ===========================================================
 # Общие функции для проверки данных и навигации
 # ===========================================================
+import math  # для округления вверх
 
 def validate_id(input_value):
     """
@@ -40,21 +41,45 @@ def validate_coordinates(lat, lon):
     Если results пуст (if not results), значит, данных больше нет
     """
 
-def paginate(results, offset, per_page):
+def paginate(offset, per_page, total=None):
     """
-    Проверяет, есть ли данные для отображения.
-    Возвращает новый offset или None, если нужно выйти.
+    Расширенная пагинация:
+    - [+] следующая
+    - [-] предыдущая
+    - [<<] первая
+    - [>>] последняя
+    - [0] выход в меню
+    - [число] перейти на указанную страницу
     """
-    if not results:
-        print("\nБольше данных нет.")
-        if offset > 0:
-            offset -= per_page
-        command = input("[-] Назад | [0] В меню: ").strip().lower()
-        if command == "-":
-            offset -= per_page
-            if offset < 0:
-                offset = 0
+    # === Вычисляем текущую и общее количество страниц ===
+    if total is not None:
+        total_pages = math.ceil(total / per_page)
+        current_page = offset // per_page + 1
+        print(f"\n📄 Страница {current_page} из {total_pages}")
+    else:
+        print("\n📄 Переход между страницами:")
+
+    print("[<<] Первая | [+] Следующая | [-] Предыдущая | [>>] Последняя | [число] Перейти | [0] Меню")
+
+    command = input("Ваш выбор: ").strip().lower()
+
+    if command == "+":
+        return offset + per_page
+    elif command == "-":
+        return max(0, offset - per_page)
+    elif command == "<<":
+        return 0
+    elif command == ">>" and total is not None:
+        return (total_pages - 1) * per_page
+    elif command == "0":
+        return None
+    elif command.isdigit():
+        page = int(command)
+        if total is not None and 1 <= page <= total_pages:
+            return (page - 1) * per_page
+        else:
+            print("Ошибка: номер страницы вне допустимого диапазона.")
             return offset
-        elif command == "0":
-            return None
-    return offset
+    else:
+        print("Неверная команда.")
+        return offset
