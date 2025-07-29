@@ -9,21 +9,22 @@
 # - Удаление рынка
 # ===========================================================
 
-from .db import execute_query  # работа с БД
-from .utils import validate_id, validate_coordinates, paginate  # общие функции
-
+from .db import execute_query  # импортируем функцию, которая выполняет SQL-запросы
+from .utils import validate_id, validate_coordinates, paginate  # импортируем функции для проверки ввода и навигации
 # ===========================================================
 # 1. Список рынков с пагинацией
 # ===========================================================
 def show_markets():
-    per_page = 20
-    offset = 0
+    per_page = 20 # Кол-во записей на одну страницу
+    offset = 0 # Смещение — с какой записи начинать вывод
+    
     # Получаем общее количество рынков
     count_query = "SELECT COUNT(*) FROM markets"
-    total = execute_query(count_query, fetch=True)[0]['count']
+    total = execute_query(count_query, fetch=True)[0]['count'] # вытаскиваем число из результата
 
 
     while True:
+        # SQL-запрос выводит id, имя, город, штат, рейтинг и число отзывов
         query = """
             SELECT m.id, m.name, l.city, l.state,
                    COALESCE(AVG(r.rating), 0) AS avg_rating,
@@ -35,32 +36,37 @@ def show_markets():
             ORDER BY m.id
             LIMIT %s OFFSET %s
         """
+        # Выполняем запрос и получаем результат
         results = execute_query(query, (per_page, offset), fetch=True)
 
         if not results:
             print("Больше данных нет.")
             break  # выходим в меню
 
-
+        # Выводим список рынков
         print(f"\n=== Список рынков (с {offset + 1} по {offset + len(results)}) ===")
         for r in results:
             print(f"{r['id']}. {r['name']} ({r['city']}, {r['state']}) "
                   f"- Рейтинг: {round(r['avg_rating'], 1)} | Отзывов: {r['review_count']}")
-
+        # Переход на следующую/предыдущую страницу
         offset = paginate(offset, per_page, total)
         if offset is None:
-            break
-
+            break # если пользователь выбрал выход — выходим из цикла
 
 
 # ===========================================================
 # 2. Поиск по городу/штату/индексу
 # ===========================================================
 def search_market():
+    # Запрашиваем у пользователя город, штат и индекс
+    # Если нажать Enter — значение будет пустым, это значит "не фильтровать по этому полю"
     city = input("Введите город (Enter - пропустить): ").strip()
     state = input("Введите штат (Enter - пропустить): ").strip()
     zip_code = input("Введите индекс (Enter - пропустить): ").strip()
 
+    # SQL-запрос с динамическими условиями.
+    # ILIKE — это регистронезависимый поиск (например, 'ny' найдёт 'New York')
+    # Каждое условие: если поле не заполнено, то оно не фильтрует (условие %s = '' OR ...)
     query = """
         SELECT m.id, m.name, l.city, l.state, l.zip
         FROM markets m
@@ -70,9 +76,11 @@ def search_market():
           AND (%s = '' OR l.zip = %s)
         LIMIT 20
     """
+    # Передаём параметры: сначала значение, затем шаблон с %
     params = (city, f"%{city}%", state, f"%{state}%", zip_code, zip_code)
     results = execute_query(query, params, fetch=True)
 
+    # Если есть результаты — печатаем, иначе выводим сообщение
     if results:
         print("\n=== Результаты поиска ===")
         for r in results:
@@ -85,10 +93,12 @@ def search_market():
 # 3. Детали рынка + отзывы
 # ===========================================================
 def show_market_details():
+    # Запрашиваем ID рынка и валидируем его (функция вернёт int или None)
     market_id = validate_id(input("Введите ID рынка: ").strip())
     if market_id is None:
-        return
+        return # если ID не число — выходим
 
+    # SQL-запрос на получение полной информации о выбранном рынке
     query = """
         SELECT m.name, l.city, l.state, m.website, m.facebook, m.twitter, m.youtube, m.other_media
         FROM markets m
@@ -98,10 +108,12 @@ def show_market_details():
     details = execute_query(query, (market_id,), fetch=True)
 
     if not details:
-        print("Рынок не найден.")
+        print("Рынок не найден.") # если рынок не найден — выходим
         return
 
-    d = details[0]
+    d = details[0] # вытаскиваем первую (и единственную) строку результата
+
+    # Выводим информацию на экран
     print(f"\nНазвание: {d['name']}")
     print(f"Город: {d['city']}, {d['state']}")
     print(f"Website: {d['website']}")
@@ -110,6 +122,7 @@ def show_market_details():
     print(f"Youtube: {d['youtube']}")
     print(f"Other: {d['other_media']}")
 
+    # Далее — получаем и выводим отзывы
     print("\nОтзывы:")
     reviews = execute_query("SELECT id, user_name, rating, review_text FROM reviews WHERE market_id = %s",
                              (market_id,), fetch=True)
@@ -124,6 +137,7 @@ def show_market_details():
 # 4. Сортировка рынков
 # ===========================================================
 def sort_markets():
+    # Предлагаем пользователю выбрать критерий сортировки
     print("\nСортировка по: [1] рейтингу, [2] городу, [3] штату, [4] расстоянию")
     choice = input("Выберите: ").strip()
     direction = "ASC"
@@ -137,13 +151,16 @@ def sort_markets():
 
     per_page = 20
     offset = 0
-    # Получаем общее количество строк для сортировки
+    
+    # Получаем общее количество рынков для правильной пагинации
     total_query = "SELECT COUNT(*) FROM markets"
     total = execute_query(total_query, fetch=True)[0]['count']
 
-
+    # Вариант сортировки: по рейтингу
     if choice == "1":
         order_clause = f"ORDER BY avg_rating {direction}"
+        
+        # Используем шаблон SQL-запроса с группировкой по рынкам
         query_template = f"""
             SELECT m.id, m.name, l.city, l.state, COALESCE(AVG(r.rating), 0) AS avg_rating
             FROM markets m
@@ -153,6 +170,8 @@ def sort_markets():
             {{order}}
             LIMIT %s OFFSET %s
         """
+    
+    # Сортировка по городу
     elif choice == "2":
         order_clause = f"ORDER BY l.city {direction}"
         query_template = f"""
@@ -162,6 +181,8 @@ def sort_markets():
             {{order}}
             LIMIT %s OFFSET %s
         """
+    
+    # Сортировка по штату
     elif choice == "3":
         order_clause = f"ORDER BY l.state {direction}"
         query_template = f"""
@@ -171,7 +192,10 @@ def sort_markets():
             {{order}}
             LIMIT %s OFFSET %s
         """
-    else:  # если выбрана сортировка по расстоянию
+        
+    # Сортировка по расстоянию — отдельный случай, нужна координата
+    else:  
+        # Бесконечный цикл — пока не введём корректные координаты
         while True:
             lat = input("Введите широту: ").strip()
             if lat == "0":
@@ -181,13 +205,15 @@ def sort_markets():
             if lon == "0":
                 print("Возврат в меню...")
                 return
-            coords = validate_coordinates(lat, lon)
+            
+            coords = validate_coordinates(lat, lon) # проверка корректности координат
             if coords:
                 lat, lon = coords
                 break
             else:
                 print("Повторите ввод координат.\n")
 
+        # Кол-во только тех рынков, у которых есть координаты
         count_query = """
             SELECT COUNT(*) FROM markets
             WHERE latitude IS NOT NULL AND longitude IS NOT NULL
@@ -195,6 +221,8 @@ def sort_markets():
         total = execute_query(count_query, fetch=True)[0]['count']
 
         order_clause = f"ORDER BY distance {direction}"
+        
+        # В SQL запросе используем формулу Haversine для расчёта расстояния в милях
         query_template = f"""
             SELECT m.id, m.name, l.city, l.state,
             (3959 * acos(
@@ -209,14 +237,16 @@ def sort_markets():
             LIMIT %s OFFSET %s
         """
 
+    # Основной цикл вывода отсортированных данных с постраничным просмотром
     while True:
+        # Вставляем нужный order_by в шаблон запроса
         query = query_template.format(order=order_clause)
         results = execute_query(query, (per_page, offset), fetch=True)
         if not results:
             print("Больше данных нет.")
             break
 
-
+        # Выводим рынки с учётом типа сортировки
         for r in results:
             if "avg_rating" in r:
                 print(f"{r['id']}. {r['name']} ({r['city']}, {r['state']}) - Рейтинг: {round(r['avg_rating'], 1)}")
@@ -225,6 +255,7 @@ def sort_markets():
             else:
                 print(f"{r['id']}. {r['name']} ({r['city']}, {r['state']})")
 
+        # Обновляем смещение offset в зависимости от действий пользователя
         offset = paginate(offset, per_page, total)
         if offset is None:
             break
@@ -235,18 +266,23 @@ def sort_markets():
 # 5. Поиск по радиусу (30 миль)
 # ===========================================================
 def search_by_radius():
-    # Бесконечный цикл, пока не введем корректные координаты
+    # Бесконечный цикл — пока пользователь не введёт правильные координаты
     while True:
         lat = input("Введите широту: ").strip()
         lon = input("Введите долготу: ").strip()
+        
+        # Проверяем координаты на корректность: float + в пределах допустимого диапазона
         coords = validate_coordinates(lat, lon)
-        if coords:  # если координаты корректные
+        if coords:  
+            # Если координаты валидны — распаковываем кортеж (lat, lon)
             lat, lon = coords
             break     # выходим из цикла
         else:
             print("Повторите ввод координат.\n")
 
-    # Далее SQL-запрос как было
+    # SQL-запрос: считаем расстояние от введённой точки до каждого рынка
+    # Используем формулу "Haversine" через функцию acos для расчёта расстояния в милях
+    # 3959 — радиус Земли в милях
     query = """
         SELECT m.id, m.name, l.city, l.state,
         (3959 * acos(
@@ -264,6 +300,7 @@ def search_by_radius():
         ORDER BY distance ASC
         LIMIT 20
     """
+    # Параметры передаём 6 раз — т.к. формула дублируется в SELECT и WHERE
     params = (lat, lon, lat, lat, lon, lat)
     results = execute_query(query, params, fetch=True)
 
@@ -278,12 +315,15 @@ def search_by_radius():
 # 6. Удаление рынка
 # ===========================================================
 def delete_market():
+    # Запрашиваем у пользователя ID и проверяем его на целое число
     market_id = validate_id(input("Введите ID рынка: ").strip())
     if market_id is None:
-        return
-
+        return # если ID не число — выходим
+    
+    # Просим пользователя подтвердить удаление
     confirm = input(f"Удалить рынок {market_id}? (y/n): ").strip().lower()
     if confirm == "y":
+        # Удаляем рынок из таблицы markets по ID
         execute_query("DELETE FROM markets WHERE id = %s", (market_id,))
         print("Рынок удалён.")
     else:

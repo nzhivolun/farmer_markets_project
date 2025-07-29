@@ -5,23 +5,21 @@
 #
 # Основные шаги:
 # 1. Подключение к базе данных.
-# 2. Добавление категорий (справочник) в таблицу categories.
-# 3. Чтение CSV и вставка данных:
-#    - Таблица locations (локации рынков)
-#    - Таблица markets (основные данные рынка)
-#    - Таблица market_categories (связь рынок -> категория)
+# 2. Добавление категорий в таблицу categories.
+# 3. Добавление локаций, рынков и связей с категориями.
 # =======================================================
 
 import sys
 import os
 import csv
-import psycopg2
+import psycopg2  # библиотека для подключения к PostgreSQL
+
 
 # === Добавляем путь к папке setup, чтобы импортировать config.py ===
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'setup'))
 
 # === Импортируем настройки подключения к базе данных ===
-from setup.config import DB_CONFIG
+from setup.config import DB_CONFIG 
 
 # === Путь к CSV-файлу с исходными данными ===
 CSV_FILE = os.path.join(os.path.dirname(__file__), '..', 'setup', 'Export.csv')
