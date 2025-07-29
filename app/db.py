@@ -47,27 +47,24 @@ def execute_query(query, params=None, fetch=False):
     """
 
     # 1. Создаем подключение к базе данных
-    conn = get_connection()
+    with get_connection() as conn:
 
-    # 2. Создаем курсор для выполнения запросов
-    # Используем RealDictCursor, чтобы результат возвращался как словарь:
-    #   { 'id': 1, 'name': 'Market 1' }
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+        # 2. Создаем курсор для выполнения запросов
+        # Используем RealDictCursor, чтобы результат возвращался как словарь:
+        #   { 'id': 1, 'name': 'Market 1' }
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
 
-    # 3. Выполняем SQL-запрос
-    # params or () — если params нет, передаем пустой кортеж, чтобы не было ошибок
-    cur.execute(query, params or ())
+            # 3. Выполняем SQL-запрос
+            # params or () — если params нет, передаем пустой кортеж, чтобы не было ошибок
+            cur.execute(query, params or ())
 
-    # 4. Если нужно получить результат, читаем все строки
-    result = None
-    if fetch:
-        result = cur.fetchall()  # Возвращает список словарей
+            # 4. Если нужно получить результат, читаем все строки
+            result = None
+            if fetch:
+                result = cur.fetchall()  # Возвращает список словарей
 
-    # 5. Фиксируем изменения (если были INSERT/UPDATE/DELETE)
-    conn.commit()
+            # 5. Фиксируем изменения (если были INSERT/UPDATE/DELETE)
+            conn.commit()
 
-    # 6. Закрываем соединение с базой
-    conn.close()
-
-    # 7. Возвращаем результат (или None)
+    # 6. Возвращаем результат (или None)
     return result
