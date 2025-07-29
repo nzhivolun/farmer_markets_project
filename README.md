@@ -79,6 +79,7 @@ farmer_markets_project/
 ├── README.md             # Инструкция по запуску
 └── docs/
     └── Admin_User_Guide.pdf
+    └── User_Guide.pdf
 
 
 

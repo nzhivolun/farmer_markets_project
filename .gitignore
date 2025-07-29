@@ -9,3 +9,6 @@ venv/
 # System files
 .DS_Store
 Thumbs.db
+
+# Исключить все .docx-документы (например, отчёты, черновики)
+*.docx
