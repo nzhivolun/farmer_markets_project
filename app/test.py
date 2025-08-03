@@ -14,5 +14,7 @@ with open (CSV_FILE, 'r') as file:
     line = file.readline()
     line = line.split(",")[28:-2]
     print(line)
-
     
+
+
+

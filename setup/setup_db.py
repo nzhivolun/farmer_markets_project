@@ -118,3 +118,4 @@ def create_tables():
 if __name__ == "__main__":
     create_database()  # создаём базу
     create_tables()    # создаём таблицы
+

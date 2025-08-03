@@ -18,3 +18,4 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER", "app_user"),       # заменили postgres на app_user
     "password": os.getenv("DB_PASSWORD", "app_pass") # заменили суперпользователя на нормального юзера
 }
+
