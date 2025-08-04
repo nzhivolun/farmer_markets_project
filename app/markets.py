@@ -10,7 +10,7 @@
 # ===========================================================
 
 from .db import execute_query  # импортируем функцию, которая выполняет SQL-запросы
-from .utils import validate_id, validate_coordinates, paginate  # импортируем функции для проверки ввода и навигации
+from .utils import validate_id, validate_coordinates, paginate # импортируем функции для проверки ввода и навигации
 # ===========================================================
 # 1. Список рынков с пагинацией
 # ===========================================================
@@ -58,35 +58,54 @@ def show_markets():
 # 2. Поиск по городу/штату/индексу
 # ===========================================================
 def search_market():
-    # Запрашиваем у пользователя город, штат и индекс
-    # Если нажать Enter — значение будет пустым, это значит "не фильтровать по этому полю"
+    # Ввод от пользователя
     city = input("Введите город (Enter - пропустить): ").strip()
     state = input("Введите штат (Enter - пропустить): ").strip()
     zip_code = input("Введите индекс (Enter - пропустить): ").strip()
 
-    # SQL-запрос с динамическими условиями.
-    # ILIKE — это регистронезависимый поиск (например, 'ny' найдёт 'New York')
-    # Каждое условие: если поле не заполнено, то оно не фильтрует (условие %s = '' OR ...)
-    query = """
+    # SQL с параметрами
+    base_query = """
         SELECT m.id, m.name, l.city, l.state, l.zip
         FROM markets m
         JOIN locations l ON m.location_id = l.id
         WHERE (%s = '' OR l.city ILIKE %s)
           AND (%s = '' OR l.state ILIKE %s)
           AND (%s = '' OR l.zip = %s)
-        LIMIT 20
+        ORDER BY m.id
+        LIMIT %s OFFSET %s
     """
-    # Передаём параметры: сначала значение, затем шаблон с %
-    params = (city, f"%{city}%", state, f"%{state}%", zip_code, zip_code)
-    results = execute_query(query, params, fetch=True)
 
-    # Если есть результаты — печатаем, иначе выводим сообщение
-    if results:
-        print("\n=== Результаты поиска ===")
+    # Считаем общее количество подходящих строк
+    count_query = """
+        SELECT COUNT(*) 
+        FROM markets m
+        JOIN locations l ON m.location_id = l.id
+        WHERE (%s = '' OR l.city ILIKE %s)
+          AND (%s = '' OR l.state ILIKE %s)
+          AND (%s = '' OR l.zip = %s)
+    """
+
+    params = (city, f"%{city}%", state, f"%{state}%", zip_code, zip_code)
+    total = execute_query(count_query, params, fetch=True)[0]['count']
+
+    if total == 0:
+        print("Ничего не найдено.")
+        return
+
+    per_page = 20
+    offset = 0
+
+    while True:
+        print(f"\n=== Найдено {total} рынков ===")
+        query_params = (*params, per_page, offset)
+        results = execute_query(base_query, query_params, fetch=True)
+
         for r in results:
             print(f"{r['id']}. {r['name']} ({r['city']}, {r['state']} ZIP: {r['zip']})")
-    else:
-        print("Ничего не найдено.")
+
+        offset = paginate(offset, per_page, total)
+        if offset is None:
+            break
 
 
 # ===========================================================
@@ -125,12 +144,17 @@ def show_market_details():
     # Далее — получаем и выводим отзывы
     print("\nОтзывы:")
     reviews = execute_query("SELECT id, user_name, rating, review_text FROM reviews WHERE market_id = %s",
-                             (market_id,), fetch=True)
+                            (market_id,), fetch=True)
+
     if reviews:
         for r in reviews:
-            print(f"[{r['id']}] {r['user_name']} ({r['rating']}): {r['review_text']}")
+            user = str(r.get('user_name') or "").strip()
+            text = str(r.get('review_text') or "").strip()
+            print(f"[{r['id']}] {user} ({r['rating']}): {text}")
     else:
         print("Нет отзывов.")
+
+
 
 
 # ===========================================================
