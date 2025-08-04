@@ -35,7 +35,10 @@ CREATE TABLE markets (
     youtube VARCHAR(255),            -- ссылка на YouTube
     other_media TEXT,                -- другие медиа (например, Instagram)
     latitude DECIMAL(10, 6),         -- широта (для поиска по радиусу)
-    longitude DECIMAL(10, 6)         -- долгота
+    longitude DECIMAL(10, 6),        -- долгота
+
+    -- Ограничение уникальности по совокупности полей
+    CONSTRAINT unique_market_entry UNIQUE (name, location_id, website, facebook, twitter, youtube, other_media, latitude, longitude)
 );
 
 -- ======================================================
