@@ -11,18 +11,27 @@
 
 import sys
 import os
+# Добавляем путь к корню проекта, чтобы корректно работал импорт setup.config при ручном запуске
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import csv
 import psycopg2  # библиотека для подключения к PostgreSQL
-
-
-# === Добавляем путь к папке setup, чтобы импортировать config.py ===
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'setup'))
-
 # === Импортируем настройки подключения к базе данных ===
 from setup.config import DB_CONFIG 
 
 # === Путь к CSV-файлу с исходными данными ===
 CSV_FILE = os.path.join(os.path.dirname(__file__), '..', 'setup', 'Export.csv')
+
+def normalize(value):
+    if value is None:
+        return None
+    value = str(value).strip()
+    if value.startswith("http://"):
+        value = value.replace("http://", "https://")
+    if value.endswith("/"):
+        value = value.rstrip("/")
+    return value if value else None
+
 
 def load_data():
     """
@@ -36,20 +45,20 @@ def load_data():
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor() # создает курсор: Курсор позволяет выполнять SQL-запросы и получать результаты
 
-        # === Шаг 2. Список категорий (берём из CSV колонок с Y/N) ===
-        # categories_list = [
-        #     "Bakedgoods", "Cheese", "Crafts", "Flowers", "Eggs", "Seafood",
-        #     "Herbs", "Vegetables", "Honey", "Jams", "Maple", "Meat",
-        #     "Nursery", "Nuts", "Plants", "Poultry", "Prepared", "Soap",
-        #     "Trees", "Wine", "Coffee", "Beans", "Fruits", "Grains",
-        #     "Juices", "Mushrooms", "PetFood", "Tofu", "WildHarvested"
-        # ]
+        # === Шаг 2. Получаем список категорий из заголовка CSV ===
+        with open(CSV_FILE, 'r', encoding='utf-8') as file:
+            header_line = file.readline().strip()
+            columns = header_line.split(",")
 
-        # === Шаг 2. Список категорий (берём из CSV колонок с Y/N) ===
-        categories_list = []
-        with open (CSV_FILE, 'r') as file:
-            line = file.readline()
-            categories_list = line.split(",")[28:-2]
+            # Категории начинаются с 29-й колонки (индекс 28) и идут до предпоследней
+            # Последние две колонки — "y" и "x" (координаты), их исключаем
+            categories_list = columns[28:-2]
+
+            # Убираем пробелы и лишние символы (на всякий случай)
+            categories_list = [c.strip() for c in categories_list]
+
+            print("Категории из CSV:", categories_list)  # можно временно оставить
+
 
         # === Шаг 3. Проверяем, есть ли категории в таблице categories ===
         cur.execute("SELECT COUNT(*) FROM categories")
@@ -75,7 +84,7 @@ def load_data():
         # === Шаг 4. Открываем CSV-файл для чтения ===
         with open(CSV_FILE, newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)  # Читаем строки как словарь
-
+            missing_categories = set()  # сюда запишем категории, которых нет в таблице
             # === Обрабатываем каждую строку (один рынок) ===
             for row in reader:
                 # Достаём основные поля
@@ -105,31 +114,79 @@ def load_data():
                     """, (street, city, county, state, zip_code))
                     location_id = cur.fetchone()[0]
 
-                # === Добавляем рынок в таблицу markets ===
+                # Приводим значения к нормализованному виду (убираем пробелы, '' → None)
+                market_fields = (
+                    normalize(row["MarketName"]),
+                    location_id,
+                    normalize(row["Website"]),
+                    normalize(row["Facebook"]),
+                    normalize(row["Twitter"]),
+                    normalize(row["Youtube"]),
+                    normalize(row["OtherMedia"]),
+                    float(row["y"]) if row["y"] else None,
+                    float(row["x"]) if row["x"] else None
+                )
+
+                # Пытаемся вставить рынок
                 cur.execute("""
                     INSERT INTO markets (name, location_id, website, facebook, twitter, youtube, other_media, latitude, longitude)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
-                """, (
-                    row["MarketName"], location_id,
-                    row["Website"], row["Facebook"], row["Twitter"], row["Youtube"], row["OtherMedia"],
-                    float(row["y"]) if row["y"] else None,  # широта
-                    float(row["x"]) if row["x"] else None   # долгота
-                ))
-                market_id = cur.fetchone()[0]
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (name, location_id, website, facebook, twitter, youtube, other_media, latitude, longitude)
+                    DO NOTHING
+                    RETURNING id
+                """, market_fields)
+
+                result = cur.fetchone()
+
+                if result:
+                    market_id = result[0]
+                else:
+                    # Если рынок уже есть, ищем его ID вручную (учитывая NULL и пробелы)
+                    cur.execute("""
+                        SELECT id FROM markets
+                        WHERE name IS NOT DISTINCT FROM %s
+                        AND location_id IS NOT DISTINCT FROM %s
+                        AND website IS NOT DISTINCT FROM %s
+                        AND facebook IS NOT DISTINCT FROM %s
+                        AND twitter IS NOT DISTINCT FROM %s
+                        AND youtube IS NOT DISTINCT FROM %s
+                        AND other_media IS NOT DISTINCT FROM %s
+                        AND latitude IS NOT DISTINCT FROM %s
+                        AND longitude IS NOT DISTINCT FROM %s
+                    """, market_fields)
+
+                    market_result = cur.fetchone()
+                    if market_result:
+                        market_id = market_result[0]
+                    else:
+                        print("Ошибка: рынок не найден, хотя должен быть уникальным. Пропускаем.")
+                        print("Данные для поиска:", market_fields)
+
+                        continue
+
+
+
+                
 
                 # === Добавляем связи рынок -> категория ===
                 for cat in categories_list:
-                    # Если в CSV указано Y, значит категория есть на рынке
                     if row.get(cat) == "Y":
-                        # Находим id категории по имени
                         cur.execute("SELECT id FROM categories WHERE name=%s", (cat,))
-                        category_id = cur.fetchone()[0]
+                        result = cur.fetchone()
 
-                        # Вставляем связь в таблицу market_categories
-                        cur.execute("""
-                            INSERT INTO market_categories (market_id, category_id)
-                            VALUES (%s, %s)
-                        """, (market_id, category_id))
+                        if result:
+                            category_id = result[0]
+                            cur.execute("""
+                                INSERT INTO market_categories (market_id, category_id)
+                                VALUES (%s, %s)
+                                ON CONFLICT DO NOTHING
+                            """, (market_id, category_id))
+
+                        else:
+                            if cat not in missing_categories:
+                                print(f"Предупреждение: категория '{cat}' не найдена в таблице.")
+                                missing_categories.add(cat)
+
 
             # Сохраняем все изменения
             conn.commit()
