@@ -110,3 +110,5 @@ def paginate(offset, per_page, total=None):
         # Если команда непонятна
         print("Неверная команда.")
         return offset
+
+
