@@ -6,10 +6,13 @@
 #
 # Используем библиотеку psycopg2 для работы с PostgreSQL.
 # ===========================================================
+import sys
+import os
+# Добавляем путь к корню проекта, чтобы корректно работал импорт setup.config при ручном запуске
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import psycopg2  # для подключения к PostgreSQL
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT  # нужен для CREATE DATABASE
-import os
 from setup.config import DB_CONFIG  # импортируем настройки подключения (хост, порт, база, логин, пароль)
 
 
