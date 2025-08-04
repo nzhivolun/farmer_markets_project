@@ -70,29 +70,7 @@ def create_tables():
     Используем SQL-скрипт init.sql, где описана структура таблиц.
     """
 
-    try:
-        # # 1. Подключаемся к нашей базе данных farmer_markets
-        # conn = psycopg2.connect(**DB_CONFIG)
-        # cur = conn.cursor()
-
-        # # 2. Формируем путь к файлу init.sql (лежит рядом с этим скриптом)
-        # sql_path = os.path.join(os.path.dirname(__file__), "init.sql")
-
-        # # 3. Читаем SQL-скрипт из файла
-        # with open(sql_path, "r", encoding="utf-8") as f:
-        #     sql_script = f.read()
-
-        # # 4. Выполняем весь скрипт (создание таблиц и индексов)
-        # cur.execute(sql_script)
-
-        # # 5. Фиксируем изменения
-        # conn.commit()
-        # print("Таблицы созданы успешно.")
-
-        # # 6. Закрываем соединение
-        # cur.close()
-        # conn.close()
-        
+    try:        
         # 1. Подключаемся к нашей базе данных farmer_markets
         with psycopg2.connect(**DB_CONFIG) as conn:
             with conn.cursor() as cur:
