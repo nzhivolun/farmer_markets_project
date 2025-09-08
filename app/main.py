@@ -7,9 +7,13 @@
 from .markets import show_markets, search_market, show_market_details, sort_markets, search_by_radius, delete_market
 from .reviews import add_review, delete_review
 from .categories import show_markets_by_category
+from .reviews_oop import ReviewManager
 
 
 def main():
+    
+    manager = ReviewManager()
+    
     """Главное меню приложения"""
     while True:
         print("\n=== МЕНЮ ===")
@@ -33,9 +37,9 @@ def main():
         elif choice == "3":
             show_market_details()
         elif choice == "4":
-            add_review()
+            manager.add_review()
         elif choice == "5":
-            delete_review()
+            manager.delete_review()
         elif choice == "6":
             sort_markets()
         elif choice == "7":
@@ -44,6 +48,10 @@ def main():
             delete_market()
         elif choice == "9":
             show_markets_by_category()
+            
+        elif choice == "111":
+            print(f"Состояние: {manager.last_message}")
+
         elif choice == "0":
             print("Выход...")
             break
