@@ -5,7 +5,7 @@
 # ===========================================================
 
 from .markets import show_markets, search_market, show_market_details, sort_markets, search_by_radius, delete_market
-from .reviews import add_review, delete_review
+# from .reviews import add_review, delete_review
 from .categories import show_markets_by_category
 from .reviews_oop import ReviewManager
 

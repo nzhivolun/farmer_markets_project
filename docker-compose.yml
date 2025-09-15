@@ -42,7 +42,8 @@ services:  # здесь описываются все контейнеры, ко
       DB_USER: app_user
       DB_PASSWORD: app_pass
       PYTHONPATH: "/app"  # PYTHONPATH, чтобы Python видел весь проект
-
+    ports:
+      - "8501:8501"
 # ====================== Хранилище данных PostgreSQL ======================
 volumes:
   pgdata:  # это volume, где хранятся данные PostgreSQL (не удаляются при перезапуске контейнера)
