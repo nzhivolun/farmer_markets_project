@@ -1,44 +1,65 @@
 # Farmer Markets App
 
-Консольное приложение для работы с данными фермерских рынков.  
-Разработано на **Python 3**, с использованием **PostgreSQL** в контейнере **Docker**.  
-Приложение полностью автоматизировано и запускается одной командой.  
+Приложение для работы с данными фермерских рынков.  
+Реализовано на **Python 3**, с использованием **PostgreSQL** в контейнере **Docker**.  
+Доступны два интерфейса:
+- **Консольное меню** (терминал);
+- **Веб-версия на Streamlit** (браузерный интерфейс).
 
 ---
 
 ## Возможности приложения
 - Просмотр списка рынков с пагинацией.  
 - Поиск по городу, штату или ZIP-коду.  
-- Просмотр детальной информации о рынке.  
+- Просмотр детальной информации о рынке (адрес, ссылки, категории, координаты).  
 - Добавление и удаление отзывов.  
-- Сортировка по рейтингу, городу, штату, расстоянию.  
+- Сортировка рынков (по рейтингу, городу, штату, расстоянию).  
 - Поиск рынков в радиусе **30 миль** от координат.  
-- Просмотр рынков по категориям с пагинацией (например, Meat, Fruits).  
+- Просмотр рынков по категориям с быстрым поиском и пагинацией.  
 - Удаление рынков (с каскадным удалением данных).  
 
 ---
 
 ## Требования
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) (Windows, macOS)
-- [Docker Engine + Compose](https://docs.docker.com/engine/install/) (Linux)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) (Windows, macOS)  
+- [Docker Engine + Compose](https://docs.docker.com/engine/install/) (Linux)  
 
 > **Важно:** Python и PostgreSQL локально устанавливать не нужно — всё разворачивается внутри контейнеров.
 
 ---
 
-## Как запустить проект
+## Запуск проекта
 ### Windows
-1. Убедитесь, что Docker Desktop запущен.
-2. Дважды кликните по файлу:
-start_app.bat
+1. Убедитесь, что Docker Desktop запущен.  
+2. Для консольной версии:  
+   ```bat
+   start_app.bat
+
+### Для веб-версии (Streamlit):
+3. start_app-streamlit.bat
+
 
 ---
 
 ### Linux / macOS
 В терминале выполните:
-```bash
-chmod +x start_app.sh 
-./start_app.sh 
+
+chmod +x start_app.sh
+./start_app.sh        # консольная версия
+
+chmod +x start_app-streamlit.sh
+./start_app-streamlit.sh   # веб-версия Streamlit
+
+---
+
+###
+
+После запуска Streamlit откроется по адресу:
+http://127.0.0.1:8501
+
+если запускаете в WSL или по сети — используйте IP вашей машины
+
+---
 
 Проверка работы контейнеров
 Выполните: docker ps
@@ -56,27 +77,31 @@ farmer_db (PostgreSQL)
 
 farmer_markets_project/
 ├── app/
-│   ├── main.py           # Главное меню
-│   ├── markets.py        # Функции для работы с рынками
-│   ├── reviews.py        # Работа с отзывами
-│   ├── categories.py     # Работа с категориями
-│   ├── utils.py          # Проверки, пагинация
-│   ├── db.py             # Подключение к БД
-│   ├── load_data.py      # Загрузка CSV в БД
+│   ├── main.py              # Консольное меню
+│   ├── app_streamlit.py     # Веб-интерфейс (Streamlit)
+│   ├── ui_markets_streamlit.py  # Страницы Streamlit
+│   ├── markets.py           # Логика работы с рынками
+│   ├── reviews.py           # Добавление/удаление отзывов (процедурно)
+│   ├── reviews_oop.py       # Класс ReviewManager (ООП)
+│   ├── categories.py        # Работа с категориями (консоль)
+│   ├── utils.py             # Проверки, пагинация (консоль)
+│   ├── db.py                # Подключение к БД
+│   ├── load_data.py         # Загрузка CSV в БД
 │
 ├── setup/
-│   ├── setup_db.py       # Создание базы и таблиц
-│   ├── config.py         # Настройки подключения к БД
-│   ├── init.sql          # SQL-схема БД
-│   ├── Export.csv        # Исходные данные
-│   ├── requirements.txt  # Зависимости Python
+│   ├── setup_db.py          # Создание базы и таблиц
+│   ├── config.py            # Настройки подключения к БД
+│   ├── init.sql             # SQL-схема БД
+│   ├── Export.csv           # Исходные данные
+│   ├── requirements.txt     # Зависимости Python
 │
 ├── Dockerfile
 ├── docker-compose.yml
-├── entrypoint.sh         # Скрипт запуска внутри контейнера
-├── start_app.sh          # Запуск проекта на Linux/Mac
-├── start_app.bat         # Запуск проекта на Windows
-├── README.md             # Инструкция по запуску
+├── start_app.sh             # Запуск (Linux/Mac, консоль)
+├── start_app.bat            # Запуск (Windows, консоль)
+├── start_app-streamlit.sh   # Запуск (Linux/Mac, веб)
+├── start_app-streamlit.bat  # Запуск (Windows, веб)
+├── README.md                # Инструкция по запуску
 └── docs/
     └── Admin_User_Guide.pdf
     └── User_Guide.pdf
@@ -96,6 +121,14 @@ farmer_markets_project/
 8. Удалить рынок
 9. Показать рынки по категории
 0. Выход
+
+
+Веб-версия (Streamlit)
+
+Навигация через левый сайдбар.
+В правой части страницы отображаются результаты поиска, список рынков, карточки рынка и формы.
+Все разделы повторяют консольный функционал, но с удобным UI (формы, кнопки, таблицы, пагинация).
+
 
 
 Примеры использования
