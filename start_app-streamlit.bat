@@ -57,9 +57,7 @@ REM Используем "python -m streamlit", чтобы не зависеть
 REM Файл приложения: app/app_streamlit.py
 REM ВАЖНО: address=0.0.0.0, чтобы слушать все интерфейсы внутри контейнера,
 REM        порт 8501 должен быть проброшен в docker-compose (8501:8501).
-echo Запуск Streamlit-приложения...
-docker exec -it %APP_NAME% python -m streamlit run app/app_streamlit.py --server.address=0.0.0.0 --server.port=8501
-
-echo.
-echo Открой в браузере: http://127.0.0.1:8501
+REM Запускаем Streamlit внутри контейнера
+echo Откройте в браузере: http://127.0.0.1:8501
+docker exec -it farmer_app streamlit run app/app_streamlit.py --server.address=0.0.0.0 --server.port=8501 --browser.serverAddress=127.0.0.1 --browser.serverPort=8501
 pause
