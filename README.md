@@ -358,7 +358,7 @@ python /app/tools/compile_messages.py /app/web/locale/ru/LC_MESSAGES/django.po
 ```bash
 # Пример: выполнить внутри запущенного контейнера приложения
 docker compose exec -it app sh -lc "python /app/web/manage.py createsuperuser"
-
+```
 
 📜 Лицензия
 
