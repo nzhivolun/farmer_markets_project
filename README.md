@@ -53,7 +53,7 @@
 
 ### Запуск через Docker Compose
 
-# сборка и старт всего стека (БД + Streamlit + Django)
+### сборка и старт всего стека (БД + Streamlit + Django)
 docker compose up --build
 
 - Streamlit: открой http://127.0.0.1:8501 (порт проброшен в compose).
@@ -64,16 +64,16 @@ docker compose up --build
 ### Создание суперпользователя Django
 
 - Вариант А — автоматически через исполняемые файлы
-# Зайти в папку exe/ и запустить мастер
-create_django_superuser.bat создаст суперпользователя, нужно придумать и запомнить данные супер пользователя.
-create_django_superuser.sh тоже самое, но для linux и McOS.
+### Зайти в папку exe/ и запустить мастер
+- create_django_superuser.bat создаст суперпользователя, нужно придумать и запомнить данные супер пользователя.
+- create_django_superuser.sh тоже самое, но для linux и McOS.
 
 - Вариант Б — вручную в уже запущенном контейнере
-# Зайти в контейнер Django и запустить мастер
+### Зайти в контейнер Django и запустить мастер
 docker compose exec -it farmer_django sh -lc "python /web/manage.py createsuperuser"
 
 
-# Примечание: имена сервисов смотри в docker-compose.yml (по умолчанию farmer_django).
+### Примечание: имена сервисов смотри в docker-compose.yml (по умолчанию farmer_django).
 
 ### Остановка
 ```bat
