@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'markets',  # ← добавляем наше приложение с рынками
+    # 'markets',  # ← добавляем наше приложение с рынками
+    'markets.apps.MarketsConfig',  # <-- было 'markets'
 ]
 
 # ----------------- MIDDLEWARE -----------------

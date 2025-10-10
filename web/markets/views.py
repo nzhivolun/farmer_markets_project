@@ -13,26 +13,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import Group  # нужен, чтобы добавить нового юзера в группу "Пользователи"
 from django.contrib.auth.decorators import permission_required
-from django.contrib import messages
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.models import User
-
-from django.http import JsonResponse  # ← добавь этот импорт наверху файла
-
-
-def is_admin(user):
-    """
-    Простой помощник: возвращает True, если пользователь:
-    - суперпользователь (is_superuser), ИЛИ
-    - состоит в группе "Администраторы".
-    """
-    if not user.is_authenticated:
-        return False
-    if user.is_superuser:
-        return True
-    return user.groups.filter(name="Администраторы").exists()
-
-
+from django.contrib import messages  # добавляем поддержку флеш-сообщений (успех/ошибка)
 # ---------------------------------------------
 # Саморегистрация пользователя
 # ---------------------------------------------
@@ -323,13 +304,14 @@ def markets_list(request: HttpRequest) -> HttpResponse:
 def markets_search(request: HttpRequest) -> HttpResponse:
     """
     Поиск по городу/штату/ZIP: форма GET (city/state/zip) + пагинация.
-    SQL адаптирован из Streamlit-версии без изменений логики.
+    Просто и единообразно: считаем total → строим pagination → делаем SELECT с LIMIT/OFFSET.
     """
+    # 1) Читаем фильтры из строки запроса
     city = (request.GET.get("city") or "").strip()
     state = (request.GET.get("state") or "").strip()
     zip_code = (request.GET.get("zip") or "").strip()
 
-    # total
+    # 2) Считаем total — сколько всего строк подходит под фильтр
     total = execute_query(
         """
         SELECT COUNT(*) 
@@ -343,18 +325,13 @@ def markets_search(request: HttpRequest) -> HttpResponse:
         fetch=True
     )[0]["count"]
 
-    per_page = _get_int(request, "per", default=10, min_v=5, max_v=100)
-    page = _get_int(request, "page", default=1, min_v=1, max_v=10**9)
-    p = _paginate(total, per_page, page)
-    
-    # Формируем окно страниц (±2 от текущей)
-    win = 2
-    start = max(1, p["page"] - win)
-    end = min(p["pages"], p["page"] + win)
-    page_window = list(range(start, end + 1))
-
-    # Варианты "на страницу"
-    per_options = [10, 15, 20, 50, 100]
+    # 3) Универсальная пагинация (одна на всю функцию)
+    pagination = build_pagination_context(request, total, default_per=10)
+    # В pagination уже есть:
+    # - per         → сколько на страницу
+    # - offset      → смещение
+    # - page/pages  → текущая и общее число страниц
+    # - has_prev/has_next, prev_page/next_page, per_options
 
     rows = []
     if total > 0:
@@ -369,19 +346,26 @@ def markets_search(request: HttpRequest) -> HttpResponse:
             ORDER BY m.id
             LIMIT %s OFFSET %s
             """,
-            (city, f"%{city}%", state, f"%{state}%", zip_code, zip_code, p["per_page"], p["offset"]),
+            (
+                city, f"%{city}%",
+                state, f"%{state}%",
+                zip_code, zip_code,
+                pagination["per"],          # ← берём per из одного источника
+                pagination["offset"]        # ← берём offset из одного источника
+            ),
             fetch=True
         )
 
-    pagination = build_pagination_context(request, total, default_per=10)
+    # 4) Готовим контекст
     ctx = {
         "rows": rows,
         "city": city,
         "state": state,
         "zip": zip_code,
     }
-    ctx.update(pagination)
+    ctx.update(pagination)  # добавит page/pages/per/has_prev/.../per_options/offset
     return render(request, "markets_search.html", ctx)
+
 
 # ---------------------------
 # 3) ДЕТАЛИ РЫНКА
@@ -613,158 +597,140 @@ def add_review(request: HttpRequest) -> HttpResponse:
 
 
 # ---------------------------
-# 5) УДАЛИТЬ ОТЗЫВ
+# 5) УДАЛИТЬ ОТЗЫВ (УПРОЩЁННАЯ ВЕРСИЯ С MESSAGES)
 # ---------------------------
+
+from django.contrib import messages  # ← убедись, что импорт есть вверху файла
 
 @login_required
 def delete_review(request: HttpRequest) -> HttpResponse:
     """
-    Только автор своего отзыва или администратор может удалить.
-    """
-    ctx = {}
+    Простая вьюха, которая занимается ТОЛЬКО удалением отзывов и сообщает
+    результат через messages (успех/ошибка). После любого действия —
+    редирект обратно (HTTP_REFERER) или на запасной маршрут.
 
-    # A) Удаление по известному ID
-    if request.method == "POST" and request.POST.get("action") == "delete_by_id":
+    Кто может удалить отзыв:
+      1) Суперпользователь (is_superuser),
+      2) Пользователь с правом 'markets.can_moderate_reviews',
+      3) Автор отзыва (совпадает user_name, а если у отзыва есть user_id — он должен совпасть с текущим пользователем).
+    """
+    # Маленький помощник: куда возвращаться после операции
+    fallback_url = reverse("markets:reviews")  # если нет HTTP_REFERER
+    go_back = request.META.get("HTTP_REFERER", fallback_url)
+
+    # Обрабатываем ТОЛЬКО POST, потому что удаление — это действие с изменением данных
+    if request.method != "POST":
+        # Если пришли сюда GET’ом — просто уводим назад.
+        return redirect(go_back)
+
+    # Определяем, какую кнопку нажали на форме
+    action = (request.POST.get("action") or "").strip()
+
+    # ============================================================
+    # ВЕТКА A) Удаление по известному ID (форма с полем review_id + галочка confirm)
+    # ============================================================
+    if action == "delete_by_id":
+        # 1) Безопасно читаем ID отзыва (строка → int, ошибки гасим)
         try:
             review_id = int(request.POST.get("review_id", "0"))
         except ValueError:
             review_id = 0
+
+        # 2) Проверяем галочку подтверждения
         confirm = (request.POST.get("confirm") == "on")
+
+        # 3) Базовые проверки
         if review_id <= 0:
-            ctx["error_direct"] = "Введите корректный ID отзыва."
-        elif not confirm:
-            ctx["error_direct"] = "Поставьте галочку подтверждения."
-        else:
-            # --- ДОБАВЛЯЕМ выбор автора отзыва ---
-            row = execute_query(
-                "SELECT id, user_name FROM reviews WHERE id = %s",
-                (review_id,),
-                fetch=True
-            )
-            if not row:
-                ctx["error_direct"] = "Отзыв с таким ID не найден."
-            else:
-                # -----------------------------------------------
-                # НОВАЯ ПРОВЕРКА ПРАВ ДЛЯ МОДЕРАЦИИ ОТЗЫВОВ
-                # 1) Разрешаем удалять, если:
-                #    - у пользователя есть кастомное право 'markets.can_moderate_reviews', ИЛИ
-                #    - пользователь суперпользователь, ИЛИ
-                #    - пользователь является автором этого отзыва (по имени)
-                # 2) Дополнительно проверим user_id в БД, если он у отзыва есть
-                # -----------------------------------------------
-                can_moderate = request.user.has_perm('markets.can_moderate_reviews')  # проверяем кастомное право
-                author = (row[0].get("user_name") or "").strip()  # имя автора из БД (колонка user_name)
+            messages.error(request, "Введите корректный ID отзыва (> 0).")
+            return redirect(go_back)
 
-                if can_moderate or request.user.is_superuser or request.user.username == author:
-                    # Страхуемся: сверяем, не чужой ли это отзыв по user_id
-                    review = execute_query(
-                        "SELECT user_id FROM reviews WHERE id = %s",
-                        (review_id,),
-                        fetch=True
-                    )
-                    if not review:
-                        ctx["error_direct"] = "Отзыв не найден."
-                    else:
-                        # Если у отзыва есть user_id, и это НЕ наш id, и мы НЕ модератор/не суперюзер — запрещаем
-                        uid = review[0].get("user_id")
-                        if (uid is not None) and (uid != request.user.id) and not (can_moderate or request.user.is_superuser):
-                            ctx["error_direct"] = "Вы не можете удалить чужой отзыв."
-                        else:
-                            # Всё ок — удаляем
-                            execute_query("DELETE FROM reviews WHERE id = %s", (review_id,), fetch=False)
-                            ctx["success_direct"] = f"Отзыв #{review_id} удалён."
-                else:
-                    ctx["error_direct"] = "Недостаточно прав для удаления этого отзыва."
+        if not confirm:
+            messages.error(request, "Поставьте галочку подтверждения удаления.")
+            return redirect(go_back)
 
-
-
-    # B) Поиск отзывов
-    try:
-        market_id = int(request.GET.get("market_id", "0"))
-    except ValueError:
-        market_id = 0
-    q = (request.GET.get("q") or "").strip()
-
-    where_clauses = []
-    params = []
-    if market_id > 0:
-        where_clauses.append("r.market_id = %s")
-        params.append(market_id)
-    if q:
-        where_clauses.append("(r.user_name ILIKE %s OR r.review_text ILIKE %s)")
-        params.extend([f"%{q}%", f"%{q}%"])
-    where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
-
-    total = 0
-    per_page = _get_int(request, "per", default=10, min_v=5, max_v=100)
-    page = _get_int(request, "page", default=1, min_v=1, max_v=10**9)
-
-    # Считаем total
-    total = execute_query(f"SELECT COUNT(*) FROM reviews r {where_sql}", tuple(params), fetch=True)[0]["count"]
-    p = _paginate(total, per_page, page)
-
-    rows = []
-    if total > 0:
-        rows = execute_query(
-            f"""
-            SELECT r.id, r.market_id, r.user_name, r.rating, r.review_text,
-                   m.name AS market_name, l.city, l.state
-            FROM reviews r
-            JOIN markets m ON m.id = r.market_id
-            JOIN locations l ON l.id = m.location_id
-            {where_sql}
-            ORDER BY r.id DESC
-            LIMIT %s OFFSET %s
-            """,
-            tuple(params) + (p["per_page"], p["offset"]),
+        # 4) Ищем отзыв в базе и берём данные автора
+        row = execute_query(
+            "SELECT id, user_id, user_name FROM reviews WHERE id = %s",
+            (review_id,),
             fetch=True
         )
+        if not row:
+            messages.error(request, "Отзыв с таким ID не найден.")
+            return redirect(go_back)
 
-    ctx.update({
-        "market_id": market_id,
-        "q": q,
-        "total": total,
-        "p": p,
-        "rows": rows,
-        "per": per_page,
-    })
+        author_id = row[0].get("user_id")           # может быть None (старые записи)
+        author_name = (row[0].get("user_name") or "").strip()
 
-    # C) Удаление конкретной записи из таблицы результатов
-    if request.method == "POST" and request.POST.get("action") == "delete_one":
+        # 5) Проверяем права
+        can_moderate = request.user.has_perm("markets.can_moderate_reviews")
+        is_super = request.user.is_superuser
+        is_author_by_name = (request.user.username == author_name)
+        # Если у отзыва user_id не пустой — сверяем его с текущим пользователем
+        is_author_by_id = (author_id is None) or (author_id == request.user.id)
+
+        if is_super or can_moderate or (is_author_by_name and is_author_by_id):
+            # 6) Всё ок — удаляем
+            execute_query("DELETE FROM reviews WHERE id = %s", (review_id,), fetch=False)
+            messages.success(request, f"Отзыв #{review_id} удалён.")
+            return redirect(go_back)
+        else:
+            messages.error(request, "Недостаточно прав для удаления этого отзыва.")
+            return redirect(go_back)
+
+    # ============================================================
+    # ВЕТКА B) Удаление из таблицы результатов (кнопка в строке)
+    #   Параметры:
+    #     rid          — ID отзыва
+    #     confirm_row  — галочка подтверждения
+    # ============================================================
+    if action == "delete_one":
+        # 1) Читаем ID из формы
         try:
             rid = int(request.POST.get("rid", "0"))
         except ValueError:
             rid = 0
+
         confirm_row = (request.POST.get("confirm_row") == "on")
+
         if rid <= 0:
-            ctx["error_row"] = "Некорректный ID."
-        elif not confirm_row:
-            ctx["error_row"] = "Поставьте галочку подтверждения."
+            messages.error(request, "Некорректный ID отзыва.")
+            return redirect(go_back)
+
+        if not confirm_row:
+            messages.error(request, "Поставьте галочку подтверждения.")
+            return redirect(go_back)
+
+        # 2) Ищем отзыв и автора
+        row = execute_query(
+            "SELECT id, user_id, user_name FROM reviews WHERE id = %s",
+            (rid,),
+            fetch=True
+        )
+        if not row:
+            messages.error(request, "Отзыв не найден.")
+            return redirect(go_back)
+
+        author_id = row[0].get("user_id")
+        author_name = (row[0].get("user_name") or "").strip()
+
+        # 3) Проверяем права (та же логика, что и выше)
+        can_moderate = request.user.has_perm("markets.can_moderate_reviews")
+        is_super = request.user.is_superuser
+        is_author_by_name = (request.user.username == author_name)
+        is_author_by_id = (author_id is None) or (author_id == request.user.id)
+
+        if is_super or can_moderate or (is_author_by_name and is_author_by_id):
+            execute_query("DELETE FROM reviews WHERE id = %s", (rid,), fetch=False)
+            messages.success(request, f"Отзыв #{rid} удалён.")
+            return redirect(go_back)
         else:
-            # --- ДОБАВЛЯЕМ выбор автора отзыва ---
-            row = execute_query(
-                "SELECT id, user_name FROM reviews WHERE id = %s",
-                (rid,),
-                fetch=True
-            )
-            if not row:
-                ctx["error_row"] = "Отзыв не найден."
-            else:
-                # Разрешаем удаление, если есть право модерации, либо суперюзер, либо автор отзыва
-                can_moderate = request.user.has_perm('markets.can_moderate_reviews')
-                author = (row[0].get("user_name") or "").strip()
+            messages.error(request, "Недостаточно прав для удаления этого отзыва.")
+            return redirect(go_back)
 
-                if can_moderate or request.user.is_superuser or request.user.username == author:
-                    execute_query("DELETE FROM reviews WHERE id = %s", (rid,), fetch=False)
-                    # Перенаправляем обратно на ту же страницу со старыми параметрами
-                    return redirect(f"{reverse('delete_review')}?...")  # оставь свой существующий redirect
-                else:
-                    ctx["error_row"] = "Недостаточно прав для удаления этого отзыва."
+    # Если action нам неизвестен — просто уходим назад
+    messages.error(request, "Неизвестное действие удаления.")
+    return redirect(go_back)
 
-
-
-    # После удаления перенаправляем обратно на страницу деталей или отзывов
-    return redirect(request.META.get("HTTP_REFERER", reverse("markets:reviews")))
 
 
 
@@ -871,29 +837,49 @@ def reviews_page(request: HttpRequest) -> HttpResponse:
                 return redirect(f"{reverse('markets:reviews')}?id={market_id}")
 
         elif action == "delete":
+
+            # 1) Аккуратно читаем из формы идентификаторы.
             review_id = request.POST.get("review_id")
             market_id = request.POST.get("market_id")
 
-            # Проверяем, что отзыв существует
+            # 2) Тянем из БД автора отзыва (и его user_id, если сохранён).
             review = execute_query(
-                "SELECT user_id, user_name FROM reviews WHERE id = %s",
+                "SELECT id, user_id, user_name FROM reviews WHERE id = %s",
                 (review_id,),
                 fetch=True
             )
 
+            # 3) Если такого отзыва нет — сообщаем об ошибке и остаёмся на странице.
             if not review:
                 context["error"] = "Отзыв не найден."
             else:
-                author_id = review[0].get("user_id")
-                author_name = review[0].get("user_name")
+                # 4) Достаём из строки нужные поля.
+                author_id = review[0].get("user_id")                 # может быть None (для старых записей)
+                author_name = (review[0].get("user_name") or "").strip()
+
+                # 5) Текущий пользователь (кто пытается удалить).
                 user = request.user
 
-                # Проверяем права
-                if user.is_authenticated and (user.is_staff or user.is_superuser or author_id == user.id):
+                # 6) Готовим расширенную проверку прав (как в delete_review):
+                #    - суперпользователь,
+                #    - имеющий perm 'markets.can_moderate_reviews',
+                #    - автор отзыва: по имени (user.username == user_name)
+                #      и (по user_id, если он задан; если user_id None — считаем ок при совпадении имени).
+                can_moderate = user.has_perm("markets.can_moderate_reviews")
+                is_super = user.is_superuser
+                is_author_by_name = user.is_authenticated and (user.username == author_name)
+                is_author_by_id = (author_id is None) or (user.is_authenticated and author_id == user.id)
+
+                # 7) Итоговое решение: можно удалять, если выполняется любой из случаев.
+                if is_super or can_moderate or (is_author_by_name and is_author_by_id):
+                    # 8) Удаляем отзыв.
                     execute_query("DELETE FROM reviews WHERE id = %s", (review_id,), fetch=False)
+                    # 9) Возвращаемся на эту же страницу выбранного рынка.
                     return redirect(f"{reverse('markets:reviews')}?id={market_id}")
                 else:
-                    context["error"] = "Вы не можете удалить чужой отзыв."
+                    # 10) Если прав не хватает — выводим понятное сообщение.
+                    context["error"] = "Недостаточно прав для удаления этого отзыва."
+
 
 
     # --- Если рынок выбран, подтягиваем отзывы ---
@@ -1056,7 +1042,6 @@ def search_by_radius(request: HttpRequest) -> HttpResponse:
     total = execute_query(total_sql, (radius,), fetch=True)[0]["count"]
 
     # 6) Пагинация
-    from math import ceil
     pages = max(1, ceil(max(0, total) / max(1, per)))
     page = min(page, pages)
     offset = (page - 1) * per

@@ -2,6 +2,7 @@
 psycopg2-binary==2.9.9
 prompt_toolkit>=3.0
 streamlit==1.38.0
+python-dotenv>=1.0
 django
 
 

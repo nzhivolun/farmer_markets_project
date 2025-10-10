@@ -1,49 +1,71 @@
 # docker-compose.yml
-# ============================================================
-# Этот файл описывает, как запускать несколько контейнеров
-# (PostgreSQL + приложение) вместе.
-#
-# Docker Compose помогает управлять сервисами и их связями.
-# ============================================================
+# Простой и понятный compose без поля "version" (оно устарело).
 
-version: "3.8"  # версия формата docker-compose (рекомендуемая)
-
-services:  # здесь описываются все контейнеры, которые будут запущены
-
-  # ====================== Сервис базы данных ======================
-  db:  # имя сервиса (будем использовать farmer_db в коде)
-    image: postgres:15  # образ PostgreSQL версии 15
-    container_name: farmer_db  # имя контейнера (удобно для docker exec)
-    restart: always  # если контейнер упадёт — перезапустить
-    environment:  # переменные окружения для настройки PostgreSQL
-      POSTGRES_DB: farmer_markets        # имя базы данных
-      POSTGRES_USER: app_user            # имя пользователя
-      POSTGRES_PASSWORD: app_pass        # пароль
+services:
+  # ====================== PostgreSQL ======================
+  farmer_db:                                   # имя сервиса БД
+    image: postgres:15
+    container_name: farmer_db           # удобное имя контейнера
+    restart: always
+    environment:
+      POSTGRES_DB: farmer_markets       # имя базы
+      POSTGRES_USER: app_user           # пользователь
+      POSTGRES_PASSWORD: app_pass       # пароль
     ports:
-      - "5432:5432"  # пробрасываем порт, чтобы подключаться с хоста
+      - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data  # сохраняем данные в volume, чтобы не потерялись
+      - pgdata:/var/lib/postgresql/data # volume для сохранности данных
 
-  # ====================== Сервис приложения ======================
+  # ====================== Streamlit (как было) ======================
   app:
-    build: .  # собираем образ из Dockerfile в текущей папке
-    container_name: farmer_app  # имя контейнера приложения
-    restart: always # если контейнер упадёт — перезапустить
+    build: .
+    container_name: farmer_app
+    restart: always
     depends_on:
-      - db  # приложение зависит от базы данных (ждём её запуска)
+      - farmer_db                               # <<< ИМЕННО "db"
+    environment:
+      DB_NAME: farmer_markets
+      DB_USER: app_user
+      DB_PASSWORD: app_pass
+      DB_HOST: farmer_db
+      DB_PORT: 5432
+      APP_MODE: "streamlit"
+    working_dir: /app
+    entrypoint: ["/bin/bash", "/app/entrypoint.sh"]
     volumes:
-      - .:/app  # монтируем текущую папку внутрь контейнера (для доступа к коду)
-    stdin_open: true   # чтобы работал интерактивный режим (input)
-    tty: true          # поддержка терминала
-    environment:  # передаем настройки подключения к базе
-      DB_HOST: db           # имя сервиса db (Docker DNS)
+      - .:/app                            # монтируем весь проект
+    ports:
+      - "8501:8501"
+
+  # ====================== Django ======================
+  farmer_django:
+    build: .
+    container_name: farmer_django
+    restart: always
+    depends_on:
+      - farmer_db                                # <<< ИМЕННО "db"
+    environment:
+      DJANGO_SETTINGS_MODULE: fm_project.settings
+      PYTHONUNBUFFERED: "1"
+      DEBUG: "1"
+      ALLOWED_HOSTS: "127.0.0.1,localhost"
+      DB_HOST: farmer_db
       DB_PORT: 5432
       DB_NAME: farmer_markets
       DB_USER: app_user
       DB_PASSWORD: app_pass
-      PYTHONPATH: "/app"  # PYTHONPATH, чтобы Python видел весь проект
+      APP_MODE: "django"                  # режим для entrypoint (если используете)
+    working_dir: /web                     # здесь лежит manage.py
+    entrypoint: ["/bin/bash", "/app/entrypoint.sh"]
+    command: >
+      sh -lc "python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8502"
+    volumes:
+      - .:/app                            # чтобы был доступен /app/entrypoint.sh
+      - ./web:/web                        # чтобы /web/manage.py был внутри контейнера
     ports:
-      - "8501:8501"
-# ====================== Хранилище данных PostgreSQL ======================
+      - "8502:8502"
+
+# ====================== Volume для БД ======================
 volumes:
-  pgdata:  # это volume, где хранятся данные PostgreSQL (не удаляются при перезапуске контейнера)
+  pgdata:

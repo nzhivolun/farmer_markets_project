@@ -68,22 +68,31 @@
 
                 <div class="content">
                     <div class="container-fluid">
+                        
+                        
+
 
                         {% comment %}
                         Этот блок будет наполняться на конкретных страницах.
                         Делаем максимально просто, без логики — только место под контент.
                         {% endcomment %}
                         {% block content %}
+                        {% if messages %}
+                        <div class="container mt-3">
+                            {% for message in messages %}
+                            {# Bootstrap-класс берём из message.tags:
+                                success → зелёный, error → красный, warning → жёлтый, info → синий. #}
+                            <div class="alert alert-{{ message.tags }} mb-2" role="alert">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                         {% endblock %}
 
                     </div>
                 </div>
-
-
-
                 {% include "_partials/_footer.html" %}
-
-
             </div>
 
             <!-- ============================================================== -->
@@ -579,6 +588,7 @@
 
         {# 5) Страница может добавить свои скрипты здесь #}
         {% block scripts_extra %}{% endblock %}
+
 
     </body>
 </html>
