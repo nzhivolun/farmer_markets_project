@@ -1,0 +1,54 @@
+{% load i18n %}
+{% load static %}
+<!-- templates/_partials/_account_modal.html -->
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{% url 'markets:update_account' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="accountModalLabel">{% trans 'My Account' %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+
+        <div class="modal-body">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="username" class="form-label">{% trans 'User name' %}</label>
+            <input type="text" class="form-control" id="username" name="username" 
+                   value="{{ request.user.username }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">{% trans 'Email' %}</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   value="{{ request.user.email }}">
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">{% trans 'New Password (option)' %}</label>
+            <input type="password" class="form-control" id="password" name="password1"
+                    placeholder="{% trans 'Leave it empty if you dont want to change it.' %}">
+            </div>
+
+            <div class="mb-3">
+            <label for="password2" class="form-label">{% trans 'Repeat the password' %}</label>
+            <input type="password" class="form-control" id="password2" name="password2"
+                    placeholder="{% trans 'Enter the same password again' %}">
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Cancel' %}</button>
+          <button type="submit" class="btn btn-primary">{% trans 'Save changes' %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

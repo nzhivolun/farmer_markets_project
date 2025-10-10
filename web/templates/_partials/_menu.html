@@ -1,0 +1,107 @@
+{% load i18n %}
+{% load static %}
+<!-- ========== Menu ========== -->
+<div class="app-menu">  
+
+    <!-- Brand Logo -->
+    <div class="logo-box">
+        <!-- Brand Logo Light -->
+        <a href="{% url 'markets:home' %}" class="logo-light">
+            <img src="{% static 'assets/images/logo-light.png' %}" alt="logo" class="logo-lg">
+            <img src="{% static 'assets/images/logo-sm.png' %}" alt="small logo" class="logo-sm">
+        </a>
+
+        <!-- Brand Logo Dark -->
+        <a href="{% url 'markets:home' %}" class="logo-dark">
+            <img src="{% static 'assets/images/logo-dark.png' %}" alt="dark logo" class="logo-lg">
+            <img src="{% static 'assets/images/logo-sm.png' %}" alt="small logo" class="logo-sm">
+        </a>
+    </div>
+
+    <!-- menu-left -->
+    <div class="scrollbar">
+
+        <!-- User box -->
+        <div class="user-box text-center">
+            <img src="{% static 'assets/images/users/user-1.jpg' %}" alt="user-img" class="rounded-circle avatar-md">
+            
+            <p class="text-muted mb-0">{% trans "Admin Head" %}</p>
+        </div>
+
+        <!--- Menu -->
+        <ul class="menu">
+
+            <li class="menu-title">{% trans "Navigation" %}</li>
+
+            <li class="menu-item">
+                <a href="{% url 'markets:home' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="home"></i></span>
+                    <span class="menu-text">{% trans "Home" %}</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{% url 'markets:list' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="list"></i></span>
+                    <span class="menu-text">{% trans "Markets List" %}</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{% url 'markets:markets_search' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="search"></i></span>
+                    <span class="menu-text">{% trans "Search by City/State/ZIP" %}</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{% url 'markets:details' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="map-pin"></i></span>
+                    <span class="menu-text">{% trans "Market Details" %}</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{% url 'markets:reviews' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="plus-square"></i></span>
+                    <span class="menu-text">{% trans "Manage Reviews" %}</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{% url 'markets:sort_markets' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="filter"></i></span>
+                    <span class="menu-text">{% trans "Sort Markets" %}</span>
+                </a>
+            </li>
+
+            <li class="menu-item">
+                <a href="{% url 'markets:search_by_radius' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="compass"></i></span>
+                    <span class="menu-text">{% trans "Search by Radius" %}</span>
+                </a>
+            </li>
+
+            {# Показываем пункт только обладателям права 'markets.can_delete_market' #}
+            {% if perms.markets.can_delete_market %}
+            <li class="menu-item">
+            <a href="{% url 'markets:delete_market' %}" class="menu-link">
+                <span class="menu-icon"><i data-feather="trash-2"></i></span>
+                <span class="menu-text">{% trans "Delete Market" %}</span>
+            </a>
+            </li>
+            {% endif %}
+
+            <li class="menu-item">
+                <a href="{% url 'markets:by_category' %}" class="menu-link">
+                    <span class="menu-icon"><i data-feather="tag"></i></span>
+                    <span class="menu-text">{% trans "Categories" %}</span>
+                </a>
+            </li>
+
+        </ul>
+        <!--- End Menu -->
+        <div class="clearfix"></div>
+    </div>
+</div>
+<!-- ========== Left menu End ========== -->

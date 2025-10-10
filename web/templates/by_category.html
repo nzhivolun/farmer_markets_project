@@ -1,0 +1,84 @@
+{% extends "_base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+
+{% block title %}{% trans "Markets by Category" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="header-title">{% trans "Markets by Category" %}</h4>
+
+        <!-- Форма выбора категории -->
+        <form class="row g-2 mb-3" method="get">
+          <div class="col-md-4">
+            <label for="q" class="form-label">{% trans "Category filter (by name)" %}: </label>
+            <input type="text" class="form-control" id="q" name="q" value="{{ q }}">
+          </div>
+          <div class="col-md-4">
+            <label for="category_id" class="form-label">{% trans "Select category" %}:</label>
+            <select id="category_id" name="category_id" class="form-select">
+              {% for c in categories_filtered %}
+                <option value="{{ c.id }}" {% if c.id == selected_id %}selected{% endif %}>{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="per" class="form-label">{% trans "Per page" %}:</label>
+            <select id="per" name="per" class="form-select">
+              {% for n in per_options %}
+                <option value="{{ n }}" {% if per == n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">{% trans "Apply" %}</button>
+          </div>
+        </form>
+
+        <!-- Инфо о количестве -->
+        <p class="text-muted">
+          {% trans "Total markets in category" %}: {{ total }}.
+        </p>
+
+        <!-- Таблица рынков -->
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th style="width: 70px;">{% trans "ID" %}</th>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "City" %}</th>
+                <th>{% trans "State" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if rows and rows|length > 0 %}
+                {% for r in rows %}
+                  <tr>
+                    <td class="text-muted">{{ r.id }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.city }}</td>
+                    <td>{{ r.state }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">{% trans "No data to display" %}</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Пагинация: используем общий include -->
+        {% include "_includes/pagination.html" with page=page pages=pages per=per per_options=per_options has_prev=has_prev has_next=has_next prev_page=prev_page next_page=next_page extra_query="&q="|add:q|add:"&category_id="|add:selected_id %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

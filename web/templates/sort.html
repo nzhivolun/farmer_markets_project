@@ -1,0 +1,85 @@
+{% extends "_base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Sort Markets" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="header-title">{% trans "Sort Markets" %}</h4>
+
+        <!-- Форма выбора сортировки -->
+
+        <form method="get" class="row g-2 mb-3">
+        <div class="col-md-3">
+            <label class="form-label">{% trans "Sort Field" %}</label>
+            <select name="field" class="form-select" onchange="this.form.submit()">
+                <option value="rating" {% if field == "rating" %}selected{% endif %}>{% trans "Rating" %}</option>
+                <option value="city" {% if field == "city" %}selected{% endif %}>{% trans "City" %}</option>
+                <option value="state" {% if field == "state" %}selected{% endif %}>{% trans "State" %}</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">{% trans "Direction" %}</label>
+            <select name="direction" class="form-select" onchange="this.form.submit()">
+                <option value="asc" {% if direction == "asc" %}selected{% endif %}>{% trans "Ascending" %}</option>
+                <option value="desc" {% if direction == "desc" %}selected{% endif %}>{% trans "Descending" %}</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">{% trans "Apply" %}</button>
+        </div>
+      </form>
+
+
+        {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <!-- Таблица результатов -->
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "City" %}</th>
+                <th>{% trans "State" %}</th>
+                <th>{% trans "Rating" %}</th>
+                <th>{% trans "Reviews" %}</th>
+                {% if sort == "distance_asc" %}
+                <th>{% trans "Distance (miles)" %}</th>
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+              <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.name }}</td>
+                <td>{{ r.city }}</td>
+                <td>{{ r.state }}</td>
+                <td>{{ r.avg_rating|floatformat:1 }}</td>
+                <td>{{ r.review_count }}</td>
+                {% if r.distance_miles %}
+                <td>{{ r.distance_miles|floatformat:2 }}</td>
+                {% endif %}
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="text-center text-muted">{% trans "No data to display" %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Пагинация -->
+        {% include "_includes/pagination.html" with page=page pages=pages per=per per_options=per_options has_prev=has_prev has_next=has_next prev_page=prev_page next_page=next_page extra_query="&sort="|add:sort hidden_fields='<input type="hidden" name="sort" value="'|add:sort|add:'">' %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "_base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Market Details" %}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="header-title">{% trans "Market Details" %}</h4>
+        <p class="text-muted font-13">{% trans "Enter the market ID to see the details of this market" %}</p>
+
+        <form method="get" class="row g-3 mb-4">
+        
+        <div class="col-auto">
+            <input type="number" min="1" class="form-control" id="id" name="id"
+                value="{{ market_id|default:'' }}" placeholder="{% trans 'Enter the market ID' %}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">{% trans "Show" %}</button>
+        </div>
+        </form>
+
+        {% if not_found %}
+          <h4 class="text-danger">{% trans "Market with ID" %} {{ market_id }} {% trans "not found" %}</h4>
+        {% else %}
+          <!-- Название -->
+          <h3>{{ d.name }}</h3>
+
+          <!-- Адрес -->
+          <p class="text-muted">
+            {{ d.street }} {{ d.city }} {{ d.county }} {{ d.state }} {{ d.zip }}
+          </p>
+
+          <!-- Координаты -->
+          <p>{% trans "Coordinates" %}: 
+            {% if d.latitude and d.longitude %}
+              <code>{{ d.latitude }}</code>, <code>{{ d.longitude }}</code>
+            {% else %}
+              <span class="text-muted">{% trans "no data" %}</span>
+            {% endif %}
+          </p>
+
+          <!-- Ссылки -->
+          <p>
+            {% if d.website %}<a href="{{ d.website }}" target="_blank">{% trans "Web Site" %}</a>{% endif %}
+            {% if d.facebook %} | <a href="{{ d.facebook }}" target="_blank">Facebook</a>{% endif %}
+            {% if d.twitter %} | <a href="{{ d.twitter }}" target="_blank">Twitter</a>{% endif %}
+            {% if d.youtube %} | <a href="{{ d.youtube }}" target="_blank">YouTube</a>{% endif %}
+            {% if d.other_media %} | {{ d.other_media }}{% endif %}
+          </p>
+
+          <hr>
+
+          <!-- Рейтинг -->
+          <p>{% trans "Average Rating" %}: 
+            <span class="badge bg-primary">{{ avg_rating }}</span>
+            ({% trans "total" %} {{ review_count }} {% trans "reviews" %})
+          </p>
+
+          <!-- Категории -->
+          <p>
+            {% trans "Categories" %}: 
+            {% if cats and cats|length > 0 %}
+              {% for c in cats %}
+                <span class="badge bg-info text-dark">{{ c.name }}</span>
+              {% endfor %}
+            {% else %}
+              <span class="text-muted">{% trans "no categories" %}</span>
+            {% endif %}
+          </p>
+
+          <hr>
+
+          <!-- Таблица отзывов -->
+          <h5>{% trans "Reviews" %}</h5>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>{% trans "ID" %}</th>
+                  <th>{% trans "User" %}</th>
+                  <th>{% trans "Rating" %}</th>
+                  <th>{% trans "Text" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if reviews and reviews|length > 0 %}
+                  {% for r in reviews %}
+                  <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.user_name }}</td>
+                    <td>{{ r.rating }}</td>
+                    <td>{{ r.review_text }}</td>
+                    <td>
+                      {% if user.is_authenticated and user.is_staff or user.is_authenticated and r.user_id == user.id %}
+                      <form method="post" action="{% url 'markets:delete_review' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_by_id">
+                        <input type="hidden" name="review_id" value="{{ r.id }}">
+                        <input type="hidden" name="confirm" value="on">
+                        <button type="submit" class="btn btn-sm btn-danger">{% trans "Remove" %}</button>
+                      </form>
+                      {% endif %}
+                    </td>
+
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="4" class="text-muted text-center">{% trans "No reviews yet" %}</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

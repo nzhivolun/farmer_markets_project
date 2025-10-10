@@ -1,0 +1,204 @@
+{% extends "_base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Manage Reviews" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+
+        <h4 class="header-title">{% trans "Manage Reviews" %}</h4>
+
+        <!-- Ошибки -->
+        {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <!-- Поиск рынка -->
+        <!-- Поиск по ID -->
+        <form method="get" class="row g-3 mb-3">
+        <div class="col-auto">
+            <input type="number" class="form-control" name="id" placeholder="{% trans 'Enter the market ID' %}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">{% trans "Find by ID" %}</button>
+        </div>
+        </form>
+
+        <!-- Поиск по строке -->
+        <form method="get" class="row g-3 mb-4">
+        <div class="col-auto">
+            <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="{% trans 'Search by City/State/ZIP_' %}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-secondary">{% trans "Find by Text" %}</button>
+        </div>
+        </form>
+
+
+        {% if rows %}
+          <h5>{% trans "Search Results" %}</h5>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "City" %}</th>
+                <th>{% trans "State" %}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+              <tr>
+                <td>{{ r.id }}</td>
+                <td>{{ r.name }}</td>
+                <td>{{ r.city }}</td>
+                <td>{{ r.state }}</td>
+                <td>
+                  <a href="?id={{ r.id }}" class="btn btn-sm btn-outline-primary">{% trans "Select" %}</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+
+        <!-- ПАГИНАЦИЯ -->
+        {% if p %}
+        <nav aria-label="Пагинация">
+        <ul class="pagination mb-0">
+            <li class="page-item {% if p.page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="?page=1&per={{ p.per_page }}">{% trans "First" %}</a>
+            </li>
+            <li class="page-item {% if not p.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="?page={{ p.prev_page }}&per={{ p.per_page }}">{% trans "Previous" %}</a>
+            </li>
+            {% for i in page_window %}
+            <li class="page-item {% if i == p.page %}active{% endif %}">
+            <a class="page-link" href="?page={{ i }}&per={{ p.per_page }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+            <li class="page-item {% if not p.has_next %}disabled{% endif %}">
+            <a class="page-link" href="?page={{ p.next_page }}&per={{ p.per_page }}">{% trans "Next" %}</a>
+            </li>
+            <li class="page-item {% if p.page == p.pages %}disabled{% endif %}">
+            <a class="page-link" href="?page={{ p.pages }}&per={{ p.per_page }}">{% trans "Last" %}</a>
+            </li>
+        </ul>
+        </nav>
+
+        <div class="mt-3">
+        <form class="row row-cols-lg-auto g-2 align-items-center" method="get">
+            <div class="col-12">
+            <label class="col-form-label" for="per">{% trans "Records per page" %}:</label>
+            </div>
+            <div class="col-12">
+            <select class="form-select" id="per" name="per" onchange="this.form.submit()">
+                {% for n in per_options %}
+                <option value="{{ n }}" {% if p.per_page == n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+            </select>
+            </div>
+            <input type="hidden" name="page" value="1">
+            <div class="col-12">
+            <button type="submit" class="btn btn-primary">{% trans "Apply" %}</button>
+            </div>
+        </form>
+        </div>
+
+        {% endif %}
+
+
+        {% if selected_market %}
+          <hr>
+          <h5>{% trans "Market" %}: {{ selected_market.name }} ({{ selected_market.city }}, {{ selected_market.state }})</h5>
+
+          <!-- Форма добавления -->
+          <form method="post" class="row g-3 mb-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="market_id" value="{{ selected_market.id }}">
+
+            <div class="col-md-6">
+              <label for="user_name" class="form-label">{% trans "Your name" %}</label>
+              {% if user.is_authenticated %}
+                <input type="text"
+                      class="form-control"
+                      id="user_name"
+                      name="user_name"
+                      value="{{ user.username }}"
+                      readonly>
+              {% else %}
+                <input type="text"
+                      class="form-control"
+                      id="user_name"
+                      name="user_name"
+                      placeholder="Anonymous">
+              {% endif %}
+            </div>
+
+
+            <div class="col-md-6">
+              <label for="rating" class="form-label">{% trans "Rating (1–5)" %}</label>
+              <input type="number" min="1" max="5" class="form-control" id="rating" name="rating" value="5">
+            </div>
+
+            <div class="col-12">
+              <label for="review_text" class="form-label">{% trans "Review text" %}</label>
+              <textarea class="form-control" id="review_text" name="review_text" rows="3" required></textarea>
+            </div>
+
+            <div class="col-12">
+              <button type="submit" class="btn btn-success">{% trans "Add review" %}</button>
+            </div>
+          </form>
+
+          <!-- Таблица отзывов -->
+          <h5>{% trans "Reviews" %}</h5>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>{% trans "Author" %}</th>
+                <th>{% trans "Rating" %}</th>
+                <th>{% trans "Text" %}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if reviews %}
+                {% for r in reviews %}
+                  <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.user_name }}</td>
+                    <td>{{ r.rating }}</td>
+                    <td>{{ r.review_text }}</td>
+                    <td>
+                      <form method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="review_id" value="{{ r.id }}">
+                        <input type="hidden" name="market_id" value="{{ selected_market.id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "Delete" %}</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted">{% trans "No reviews yet" %}</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

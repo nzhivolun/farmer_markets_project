@@ -1,0 +1,545 @@
+# ПЕРВОЙ записью ОБЯЗАТЕЛЬНО идёт шапка каталога (msgid "", msgstr "")
+msgid ""
+msgstr ""
+"Project-Id-Version: Farmer Markets\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-08 00:00+0300\n"
+"PO-Revision-Date: 2025-10-08 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+# Перевод
+#: templates/_partials/_menu.html
+msgid "Home"
+msgstr "Главная"
+
+#: templates/_partials/_menu.html
+msgid "Home"
+msgstr "Главная"
+
+#: templates/_partials/_menu.html
+msgid "Admin Head"
+msgstr "Админская голова"
+
+#: templates/_partials/_menu.html
+msgid "Navigation"
+msgstr "Навигация"
+
+#: templates/_partials/_menu.html
+msgid "Markets List"
+msgstr "Список рынков"
+
+#: templates/_partials/_menu.html
+msgid "Search by City/State/ZIP"
+msgstr "Поиск рынков"
+
+#: templates/_partials/_menu.html
+msgid "Market Details"
+msgstr "Детали рынков"
+
+#: templates/_partials/_menu.html
+msgid "Manage Reviews"
+msgstr "Работа с отзывами"
+
+#: templates/_partials/_menu.html
+msgid "Reviews"
+msgstr "Отзывы"
+
+#: templates/_partials/_menu.html
+msgid "Sort Markets"
+msgstr "Сортировка рынков"
+
+#: templates/_partials/_menu.html
+msgid "Search by Radius"
+msgstr "Поиск по радиусу"
+
+#: templates/_partials/_menu.html
+msgid "Delete Market"
+msgstr "Удаление рынков"
+
+#: templates/_partials/_menu.html
+msgid "Categories"
+msgstr "Категории"
+
+#: templates/_partials/_topbar.html
+msgid "Notification"
+msgstr "Уведомления"
+
+#: templates/_partials/_topbar.html
+msgid "Project on GitHub"
+msgstr "Проект на GitHub"
+
+#: templates/_partials/_topbar.html
+msgid "Welcome"
+msgstr "Привет"
+
+#: templates/_partials/_topbar.html
+msgid "My Account"
+msgstr "Мой аккаунт"
+
+#: templates/_partials/_topbar.html
+msgid "Settings"
+msgstr "Настройки"
+
+#: templates/_partials/_topbar.html
+msgid "Logout"
+msgstr "Выход"
+
+#: templates/_partials/_topbar.html
+msgid "Search Market ID"
+msgstr "Поиск по ID рынка"
+
+#: templates/_partials/_topbar.html
+msgid "Login"
+msgstr "Войти"
+
+#: templates/_partials/_topbar.html
+msgid "Register"
+msgstr "Регистрация"
+
+#: templates/_partials/_footer.html
+msgid "About"
+msgstr "О нас"
+
+#: templates/_partials/_footer.html
+msgid "Support"
+msgstr "Поддержка"
+
+#: templates/_partials/_footer.html
+msgid "Contact Us"
+msgstr "Свяжитесь с нами"
+
+
+
+#: templates/_partials/_account_modal.html
+msgid "New Password (option)"
+msgstr "Новый пароль (опционально)"
+
+#: templates/_partials/_account_modal.html
+msgid "Leave it empty if you don't want to change it."
+msgstr "Оставьте пустым, если не хотите менять"
+
+#: templates/_partials/_account_modal.html
+msgid "Enter the same password again"
+msgstr "Введите тот же пароль ещё раз"
+
+#: templates/_partials/_account_modal.html
+msgid "Save changes"
+msgstr "Отмена"
+
+#: templates/_partials/_account_modal.html
+msgid "Repeat the password"
+msgstr "Повторите пароль"
+
+#: templates/_partials/_account_modal.html
+msgid "Cancel"
+msgstr "Сохранить изменения"
+
+
+
+#: templates/home.html
+msgid "Home — Farmer Markets"
+msgstr "Главная - фермерские рынки"
+
+#: templates/home.html
+msgid "Dashboard — Farmer Markets"
+msgstr "Информационная панель — Фермерские рынки"
+
+#: templates/home.html
+msgid "Total Markets"
+msgstr "Общее количество рынков"
+
+#: templates/home.html
+msgid "Total Reviews"
+msgstr "Общее количество отзывов"
+
+#: templates/home.html
+msgid "States in DB"
+msgstr "Штатов в базе данных"
+
+#: templates/home.html
+msgid "Cities in DB"
+msgstr "Городов в базе данных"
+
+#: templates/home.html
+msgid "TOP-10 States by Number of Markets"
+msgstr "ТОП-10 штатов по количеству рынков"
+
+#: templates/home.html
+msgid "Markets by Category Distribution"
+msgstr "Распределение рынков по категориям"
+
+
+#: templates/list.html
+msgid "Showing records from "
+msgstr "Показаны записи от"
+
+#: templates/list.html
+msgid "to "
+msgstr "до "
+
+#: templates/list.html
+msgid "out of "
+msgstr "из "
+
+#: templates/list.html
+msgid "Market's name"
+msgstr "Название рынка"
+
+#: templates/list.html
+msgid "Name"
+msgstr "Название рынка"
+
+#: templates/list.html
+msgid "Address"
+msgstr "Адрес"
+
+#: templates/list.html
+msgid "Rating"
+msgstr "Рейтинг"
+
+#: templates/list.html
+msgid "Reviews_"
+msgstr "Отзывы"
+
+#: templates/list.html
+msgid "Coordinates"
+msgstr "Координаты"
+
+#: templates/list.html
+msgid "Links"
+msgstr "Связи"
+
+
+
+#: templates/_includes/pagination.html
+msgid "Page "
+msgstr "Страница "
+
+#: templates/_includes/pagination.html
+msgid "Previous"
+msgstr "Предыдущий"
+
+#: templates/_includes/pagination.html
+msgid "First"
+msgstr "Первый"
+
+#: templates/_includes/pagination.html
+msgid "Next"
+msgstr "Следующий"
+
+#: templates/_includes/pagination.html
+msgid "Last"
+msgstr "Последний"
+
+#: templates/_includes/pagination.html
+msgid "Apply"
+msgstr "Применить"
+
+
+
+#: templates/markets_search.html
+msgid "Search by City/State/ZIP_"
+msgstr "Поиск по городу/штату/почтовому индексу"
+
+#: templates/markets_search.html
+msgid "Search Markets"
+msgstr "Поиск рынков"
+
+#: templates/markets_search.html
+msgid "Enter City, State or ZIP to search."
+msgstr "Введите город, штат или почтовый индекс для поиска."
+
+#: templates/markets_search.html
+msgid "City"
+msgstr "Город"
+
+#: templates/markets_search.html
+msgid "State"
+msgstr "Штат"
+
+#: templates/markets_search.html
+msgid "ZIP"
+msgstr "Почтовый индекс"
+
+
+
+#: templates/details.html
+msgid "Enter the market ID to see the details of this market"
+msgstr "Введите идентификатор рынка, чтобы просмотреть подробную информацию об этом рынке"
+
+#: templates/details.html
+msgid "Enter the market ID"
+msgstr "Введите ID рынка"
+
+#: templates/details.html
+msgid "Show"
+msgstr "Показать"
+
+#: templates/details.html
+msgid "Market with ID"
+msgstr "Рынок с идентификатором"
+
+#: templates/details.html
+msgid "not found"
+msgstr "не найден"
+
+#: templates/details.html
+msgid "no data"
+msgstr "нет данных"
+
+#: templates/details.html
+msgid "Web Site"
+msgstr "Веб сайт"
+
+#: templates/details.html
+msgid "Average Rating"
+msgstr "Средний рейтинг"
+
+#: templates/details.html
+msgid "total"
+msgstr "итого"
+
+#: templates/details.html
+msgid "reviews"
+msgstr "отзывов"
+
+#: templates/details.html
+msgid "no categories"
+msgstr "нет категорий"
+
+
+
+
+#: templates/reviews.html
+msgid "Find by ID"
+msgstr "Поиск по идентификатору"
+
+#: templates/reviews.html
+msgid "Find by Text"
+msgstr "Поиск по тексту"
+
+#: templates/reviews.html
+msgid "Search Result"
+msgstr "Результат поиска"
+
+#: templates/reviews.html
+msgid "Select"
+msgstr "Выбрать"
+
+#: templates/reviews.html
+msgid "Records per page"
+msgstr "Количество записей на странице"
+
+#: templates/reviews.html
+msgid "Market"
+msgstr "Рынок"
+
+#: templates/reviews.html
+msgid "Your name"
+msgstr "Ваше имя"
+
+#: templates/reviews.html
+msgid "Rating (1–5)"
+msgstr "Рейтинг (1-5)"
+
+#: templates/reviews.html
+msgid "Review text"
+msgstr "Текст отзыва"
+
+#: templates/reviews.html
+msgid "Add review"
+msgstr "Добавить отзыв"
+
+
+
+
+#: templates/sort.html
+msgid "Sort Field"
+msgstr "Поле сортировки"
+
+#: templates/sort.html
+msgid "Direction"
+msgstr "Сортировка"
+
+#: templates/sort.html
+msgid "Ascending"
+msgstr "По возрастанию"
+
+#: templates/sort.html
+msgid "Descending"
+msgstr "По убыванию"
+
+#: templates/sort.html
+msgid "distance_asc"
+msgstr "Расстояние"
+
+#: templates/sort.html
+msgid "Distance (miles)"
+msgstr "Расстояние (мили)"
+
+#: templates/sort.html
+msgid "Sort"
+msgstr "сортировки"
+
+
+
+#: templates/radius.html
+msgid "Search Markets by Radius"
+msgstr "Поиск рынков по радиусу"
+
+#: templates/radius.html
+msgid "Enter the correct coordinates (latitude -90..90, longitude -180..180)."
+msgstr "Введите правильные координаты (широта -90..90, долгота -180..180)."
+
+#: templates/radius.html
+msgid "For example: Latitude 44, Longitude -72, Radius 50 and click 'Search' button"
+msgstr "Например: Широта 44, долгота -72, радиус 50 и нажмите кнопку Найти"
+
+#: templates/radius.html
+msgid "Latitude"
+msgstr "Широта"
+
+#: templates/radius.html
+msgid "Longitude"
+msgstr "Долгота"
+
+#: templates/radius.html
+msgid "Radius (miles)"
+msgstr "Радиус (мили)"
+
+
+
+
+#: templates/delete_market.html
+msgid "Search by Name/City/State"
+msgstr "Поиск по названию/городу/штату"
+
+#: templates/delete_market.html
+msgid "Confirm"
+msgstr "Подтверждаю"
+
+#: templates/delete_market.html
+msgid "No data to display"
+msgstr "Нет данных для отображения"
+
+#: templates/delete_market.html
+msgid "Found"
+msgstr "Найдено"
+
+#: templates/delete_market.html
+msgid "markets"
+msgstr "рынков"
+
+
+
+
+#: templates/by_category.html
+msgid "Markets by Category"
+msgstr "Рынки по категориям"
+
+#: templates/by_category.html
+msgid "Category filter (by name)"
+msgstr "Фильтр категорий (по названию)"
+
+#: templates/by_category.html
+msgid "Select category"
+msgstr "Выберите категорию"
+
+#: templates/by_category.html
+msgid "Per page"
+msgstr "На страницу"
+
+
+
+
+#: templates/register.html
+msgid "Register | Farmer Markets"
+msgstr "Регистрация | Фермерские рынки"
+
+#: templates/register.html
+msgid "Don't have an account? Create your account, it takes less than a minute"
+msgstr "У вас нет учетной записи? Создайте свою учетную запись, это займет меньше минуты"
+
+#: templates/register.html
+msgid "Username"
+msgstr "Имя пользователя"
+
+#: templates/register.html
+msgid "Enter your username"
+msgstr "Введите свое имя пользователя"
+
+#: templates/register.html
+msgid "Enter your email"
+msgstr "Введите свой адрес электронной почты"
+
+#: templates/register.html
+msgid "Enter your password"
+msgstr "Введите свой пароль"
+
+#: templates/register.html
+msgid "Confirm Password"
+msgstr "Подтвердите пароль"
+
+#: templates/register.html
+msgid "Re-enter your password"
+msgstr "Повторно введите свой пароль"
+
+#: templates/register.html
+msgid "I accept"
+msgstr "Я принимаю"
+
+#: templates/register.html
+msgid "Terms and Conditions"
+msgstr "условия и положения"
+
+#: templates/register.html
+msgid "Sign Up"
+msgstr "Зарегистрироваться"
+
+#: templates/register.html
+msgid "Sign In"
+msgstr "Войти"
+
+
+
+#: templates/registration/login.html
+msgid "Log In | Farmer Markets"
+msgstr "Вход | Фермерские рынки"
+
+#: templates/registration/login.html
+msgid "Enter your username and password to access your account."
+msgstr "Введите свое имя пользователя и пароль для доступа к вашей учетной записи."
+
+#: templates/registration/login.html
+msgid "Log In"
+msgstr "Авторизоваться"
+
+#: templates/registration/login.html
+msgid "Don't have an account?"
+msgstr "У вас нет учетной записи?"
+
+
+
+#: templates/registration/logged_out.html
+msgid "Logout"
+msgstr "Выход из системы"
+
+#: templates/registration/logged_out.html
+msgid "See you again!"
+msgstr "Увидимся снова!"
+
+#: templates/registration/logged_out.html
+msgid "You are now successfully signed out."
+msgstr "Теперь вы успешно вышли из системы."
+
+#: templates/registration/logged_out.html
+msgid "Back to"
+msgstr "Вернуться к"

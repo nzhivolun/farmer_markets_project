@@ -1,0 +1,42 @@
+{% load i18n %}
+<!-- templates/_includes/pagination.html -->
+<nav aria-label="Pagination">
+  <ul class="pagination">
+    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+      <a class="page-link" href="?page=1&per={{ per }}{{ extra_query|default:'' }}">{% trans "First" %}</a>
+    </li>
+    <li class="page-item {% if not has_prev %}disabled{% endif %}">
+      <a class="page-link" href="?page={{ prev_page }}&per={{ per }}{{ extra_query|default:'' }}">{% trans "Previous" %}</a>
+    </li>
+    <li class="page-item disabled">
+      <span class="page-link">{% trans "Page " %}{{ page }} {% trans "out of " %}{{ pages }}</span>
+    </li>
+    <li class="page-item {% if not has_next %}disabled{% endif %}">
+      <a class="page-link" href="?page={{ next_page }}&per={{ per }}{{ extra_query|default:'' }}">{% trans "Next" %}</a>
+    </li>
+    <li class="page-item {% if page >= pages %}disabled{% endif %}">
+      <a class="page-link" href="?page={{ pages }}&per={{ per }}{{ extra_query|default:'' }}">{% trans "Last" %}</a>
+    </li>
+  </ul>
+</nav>
+
+<div class="mt-3">
+  <form class="row row-cols-lg-auto g-2 align-items-center" method="get">
+    <div class="col-12">
+      <label class="col-form-label" for="per">{% trans "Records per page" %}:</label>
+    </div>
+    <div class="col-12">
+      <select class="form-select" id="per" name="per" onchange="this.form.submit()">
+        {% for n in per_options %}
+        <option value="{{ n }}" {% if per == n %}selected{% endif %}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <!-- Дополнительные скрытые поля -->
+    {{ hidden_fields|safe }}
+    <input type="hidden" name="page" value="1">
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">{% trans "Apply" %}</button>
+    </div>
+  </form>
+</div>
