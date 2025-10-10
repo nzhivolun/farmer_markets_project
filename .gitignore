@@ -2,13 +2,19 @@
 __pycache__/
 *.pyc
 
-# Virtual environments
-venv/
-.env/
-
 # System files
 .DS_Store
 Thumbs.db
 
 # Исключить все .docx-документы (например, отчёты, черновики)
 *.docx
+
+# Virtual environments
+venv/
+.env/
+**/.env
+**/.env.*
+
+!**/.env.example
+!.env.example
+
