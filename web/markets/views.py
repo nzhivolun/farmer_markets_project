@@ -66,6 +66,9 @@ def update_account(request):
     return redirect("markets:home")
 
 
+def test_pass ():
+    pass
+
 
 def is_admin(user):
     """
