@@ -100,13 +100,19 @@ exe/start_app.bat
 exe/start_app-streamlit.bat
 ```
 
+Веб-приложение (Django):
+```bat
+exe/start_app-django.bat
+```
+
 ---
 
 ### Linux / macOS
 ```bash
 chmod +x start_app.sh
 ./start_app.sh              # консольная версия
-
+```
+```bash
 chmod +x start_app-streamlit.sh
 ./start_app-streamlit.sh    # веб-версия Streamlit
 ```
