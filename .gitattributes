@@ -1,3 +1,10 @@
 # Для bash-скриптов — всегда LF
 *.sh text eol=lf
 entrypoint.sh text eol=lf
+
+
+# Универсально: нормализуем текстовые файлы в LF в репозитории
+* text=auto
+
+# Явно: для .env.example храним LF
+web/.env.example text eol=lf

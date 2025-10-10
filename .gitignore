@@ -18,3 +18,7 @@ venv/
 !**/.env.example
 !.env.example
 
+# Игнорируем любые .env.example
+**/.env.example
+.env.example
+
