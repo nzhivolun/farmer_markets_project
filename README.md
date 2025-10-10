@@ -360,4 +360,8 @@ python /app/tools/compile_messages.py /app/web/locale/ru/LC_MESSAGES/django.po
 docker compose exec -it app sh -lc "python /app/web/manage.py createsuperuser"
 
 
+📜 Лицензия
+
+Учебный проект. Использование материалов темы UBold — см. условия их лицензии (макеты/иконки/скрипты).
+
 
