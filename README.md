@@ -65,12 +65,18 @@ docker compose up --build
 
 - Вариант А — автоматически через исполняемые файлы
 ### Зайти в папку exe/ и запустить мастер
-- create_django_superuser.bat создаст суперпользователя, нужно придумать и запомнить данные супер пользователя.
+- ```bat
+create_django_superuser.bat 
+```
+создаст суперпользователя, нужно придумать и запомнить данные супер пользователя.
 - create_django_superuser.sh тоже самое, но для linux и McOS.
 
 - Вариант Б — вручную в уже запущенном контейнере
 ### Зайти в контейнер Django и запустить мастер
+```bat
 docker compose exec -it farmer_django sh -lc "python /web/manage.py createsuperuser"
+```
+
 
 
 ### Примечание: имена сервисов смотри в docker-compose.yml (по умолчанию farmer_django).
@@ -79,7 +85,6 @@ docker compose exec -it farmer_django sh -lc "python /web/manage.py createsuperu
 ```bat
 docker compose down
 ```
-
 
 ### Windows
 Консольная версия:
