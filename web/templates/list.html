@@ -1,0 +1,95 @@
+{% extends "_base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Markets List" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="header-title">{% trans "Markets List" %}</h4>
+        <!--
+          Этот блок показывает «диапазон строк» ровно как в Streamlit:
+          "Показаны записи с N по M из T"
+          Переменные row_from / row_to / total передаём из view.
+        -->
+        <p class="text-muted">
+          {% trans "Showing records from " %}{{ row_from }} {% trans "to " %}{{ row_to }} {% trans "out of " %}{{ total }}.
+        </p>
+
+        <!-- Простая таблица Bootstrap, без DataTables и лишних скриптов -->
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th style="width: 70px;">{% trans "ID" %}</th>
+                <th>{% trans "Market's name" %}</th>
+                <th>{% trans "Address" %}</th>
+                <th style="width: 120px;">{% trans "Rating" %}</th>
+                <th style="width: 110px;">{% trans "Reviews_" %}</th>
+                <th style="width: 190px;">{% trans "Coordinates" %}</th>
+                <th>{% trans "Links" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {# "No data to display." #}
+              {% if rows and rows|length > 0 %}
+                {% for r in rows %}
+                  <tr>
+                    <!-- ID — простой текст -->
+                    <td class="text-muted">{{ r.id }}</td>
+
+                    <!-- Название рынка -->
+                    <td>
+                      <!-- Здесь можно сделать ссылку на детали, когда заведём URL details -->
+                      {{ r.name }}
+                    </td>
+
+                    <!-- Красиво собранный адрес одной строкой -->
+                    <td>
+                      <span class="text-muted">{{ r.address_line }}</span>
+                    </td>
+
+                    <!-- Средний рейтинг (1 знак) -->
+                    <td>
+                      <span class="badge bg-primary-subtle text-primary">
+                        {{ r.avg_rating }}
+                      </span>
+                    </td>
+
+                    <!-- Кол-во отзывов -->
+                    <td>
+                      <span class="badge bg-secondary-subtle text-secondary">
+                        {{ r.review_count }}
+                      </span>
+                    </td>
+
+                    <!-- Координаты как строки: lat_str, lon_str -->
+                    <td>
+                      <code>{{ r.lat_str }}</code>, <code>{{ r.lon_str }}</code>
+                    </td>
+
+                    <!-- Быстрые ссылки (website/facebook/twitter/youtube/other) одной строкой -->
+                    <td style="max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      {{ r.links_str }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="7" class="text-center text-muted">{% trans "There is no data to display." %}</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        {% include "_includes/pagination.html" with page=page pages=pages per=per per_options=per_options has_prev=has_prev has_next=has_next prev_page=prev_page next_page=next_page extra_query="" hidden_fields="" %}
+        
+      </div> <!-- /card-body -->
+    </div>   <!-- /card -->
+  </div>     <!-- /col -->
+</div>       <!-- /row -->
+{% endblock %}

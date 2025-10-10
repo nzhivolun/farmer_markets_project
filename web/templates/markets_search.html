@@ -1,0 +1,73 @@
+{% extends "_base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Search by City/State/ZIP_" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="header-title">{% trans "Search Markets" %}</h4>
+        <p class="text-muted font-13">{% trans "Enter City, State or ZIP to search." %}</p>
+
+        <!-- Форма поиска -->
+        <form method="get" class="row g-3 mb-4">
+          <div class="col-md-4">
+            <label for="city" class="form-label">{% trans "City" %}</label>
+            <input type="text" class="form-control" id="city" name="city" value="{{ city }}">
+          </div>
+          <div class="col-md-4">
+            <label for="state" class="form-label">{% trans "State" %}</label>
+            <input type="text" class="form-control" id="state" name="state" value="{{ state }}">
+          </div>
+          <div class="col-md-4">
+            <label for="zip" class="form-label">{% trans "ZIP" %}</label>
+            <input type="text" class="form-control" id="zip" name="zip" value="{{ zip }}">
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary">{% trans "Search" %}</button>
+          </div>
+        </form>
+
+        <!-- Таблица результатов -->
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>{% trans "ID" %}</th>
+                <th>{% trans "Market's name" %}</th>
+                <th>{% trans "City" %}</th>
+                <th>{% trans "State" %}</th>
+                <th>{% trans "ZIP" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if rows and rows|length > 0 %}
+                {% for r in rows %}
+                  <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.city }}</td>
+                    <td>{{ r.state }}</td>
+                    <td>{{ r.zip }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted">{% trans "No results found" %}</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ПАГИНАЦИЯ: как в list.html -->
+        {% include "_includes/pagination.html" with page=page pages=pages per=per per_options=per_options has_prev=has_prev has_next=has_next prev_page=prev_page next_page=next_page extra_query="&city="|add:city|add:"&state="|add:state|add:"&zip="|add:zip hidden_fields='<input type="hidden" name="city" value="'|add:city|add:'"><input type="hidden" name="state" value="'|add:state|add:'"><input type="hidden" name="zip" value="'|add:zip|add:'">' %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

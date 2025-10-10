@@ -43,17 +43,17 @@ CREATE TABLE markets (
 
 -- ======================================================
 -- 3. Таблица reviews (отзывы)
--- Пользователи могут оставлять отзывы и ставить рейтинг (1-5)
+-- Теперь с полем user_id для привязки к пользователю Django (auth_user)
 CREATE TABLE reviews (
-    id SERIAL PRIMARY KEY,           -- id отзыва
-    market_id INT REFERENCES markets(id) ON DELETE CASCADE, -- отзыв относится к конкретному рынку
-    user_name VARCHAR(100) NOT NULL, -- имя пользователя (обязательно)
-    rating INT CHECK (rating BETWEEN 1 AND 5),
-                                      -- оценка от 1 до 5 (проверка через CHECK)
-    review_text TEXT,                -- текст отзыва (необязательный)
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                                      -- время добавления отзыва (по умолчанию текущее время)
+    id SERIAL PRIMARY KEY,                             -- id отзыва
+    market_id INT REFERENCES markets(id) ON DELETE CASCADE,  -- рынок
+    user_id INT REFERENCES auth_user(id) ON DELETE SET NULL, -- автор (если есть)
+    user_name VARCHAR(100) NOT NULL,                   -- имя (для старых отзывов или анонимов)
+    rating INT CHECK (rating BETWEEN 1 AND 5),         -- оценка (1–5)
+    review_text TEXT,                                  -- текст отзыва
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP     -- дата создания
 );
+
 
 -- ======================================================
 -- 4. Таблица categories (справочник категорий товаров)

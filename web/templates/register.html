@@ -1,0 +1,136 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" data-topbar-color="dark">
+<head>
+    <meta charset="utf-8" />
+    <title>{% trans "Register | Farmer Markets" %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap css -->
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/css/app.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'assets/css/icons.min.css' %}" rel="stylesheet" />
+</head>
+
+<body class="authentication-bg authentication-bg-pattern">
+
+<div class="account-pages mt-5 mb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-4">
+                <div class="card bg-pattern">
+
+                    <div class="card-body p-4">
+
+                        <div class="text-center w-75 m-auto">
+                            <div class="auth-brand">
+                                <a href="/" class="logo logo-dark text-center">
+                                    <span class="logo-lg">
+                                        <img src="{% static 'assets/images/logo-dark.png' %}" alt="" height="22">
+                                    </span>
+                                </a>
+                                <a href="/" class="logo logo-light text-center">
+                                    <span class="logo-lg">
+                                        <img src="{% static 'assets/images/logo-light.png' %}" alt="" height="22">
+                                    </span>
+                                </a>
+                            </div>
+                            <p class="text-muted mb-4 mt-3">
+                                {% trans "Don't have an account? Create your account, it takes less than a minute" %}
+                            </p>
+                        </div>
+
+                        <!-- Django форма -->
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <!-- Username -->
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label">{% trans "Username" %}</label>
+                                <input type="text" name="username" maxlength="150" autofocus required
+                                       class="form-control" id="id_username"
+                                       placeholder="{% trans 'Enter your username' %}"
+                                       value="{{ form.username.value|default:'' }}">
+                                {% if form.username.errors %}
+                                    <div class="text-danger small">{{ form.username.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">{% trans "Email address" %}</label>
+                                <input type="email" name="email" required
+                                       class="form-control" id="id_email"
+                                       placeholder="{% trans 'Enter your email' %}"
+                                       value="{{ form.email.value|default:'' }}">
+                                {% if form.email.errors %}
+                                    <div class="text-danger small">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="id_password1" class="form-label">{% trans "Password" %}</label>
+                                <div class="input-group input-group-merge">
+                                    <input type="password" name="password1" required
+                                           class="form-control" id="id_password1"
+                                           placeholder="{% trans 'Enter your password' %}">
+                                    <div class="input-group-text" data-password="false">
+                                        <span class="password-eye"></span>
+                                    </div>
+                                </div>
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small">{{ form.password1.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3">
+                                <label for="id_password2" class="form-label">{% trans "Confirm Password" %}</label>
+                                <input type="password" name="password2" required
+                                       class="form-control" id="id_password2"
+                                       placeholder="{% trans 'Re-enter your password' %}">
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small">{{ form.password2.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Terms -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="checkbox-signup" required>
+                                    <label class="form-check-label" for="checkbox-signup">
+                                        {% trans "I accept" %} <a href="javascript:void(0);" class="text-dark">{% trans "Terms and Conditions" %}</a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="text-center d-grid">
+                                <button class="btn btn-success" type="submit">{% trans "Sign Up" %}</button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <p class="text-muted">
+                                {% trans "Already have an account?" %}
+                                <a href="{% url 'login' %}" class="text-primary ms-1"><b>{% trans "Sign In" %}</b></a>
+                            </p>
+                        </div>
+
+                    </div> <!-- end card-body -->
+                </div>
+                <!-- end card -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer footer-alt">
+    <script>document.write(new Date().getFullYear())</script> © Farmer Markets
+</footer>
+
+<script src="{% static 'assets/js/pages/authentication.init.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+{% extends "_base/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans 'Home — Farmer Markets' %}{% endblock %}
+
+{% block head_extra %}
+<!-- Здесь можно подключить дополнительные CSS для этой страницы, если нужно -->
+{% endblock %}
+
+{% block content %}
+<!--
+  Этот блок — основной контент страницы.
+  Пока вывели простой заголовок и подсказки, чтобы проверить, что шаблон и статика работают.
+-->
+ <!-- Start Content-->
+<div class="container-fluid">
+    
+    <!-- start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <!-- <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">UBold</a></li>
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">CRM</a></li>
+                        <li class="breadcrumb-item active">Dashboard</li>
+                    </ol> -->
+                </div>
+                <h4 class="page-title">{% trans 'Dashboard — Farmer Markets' %}</h4>
+            </div>
+        </div>
+    </div>
+    <!-- end page title -->
+
+    <div class="row">
+        <div class="col-lg-6 col-xl-3">
+          <div class="card bg-pattern">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-6">
+                  <div class="avatar-md bg-blue rounded">
+                    <i class="fe-shopping-bag avatar-title font-22 text-white"></i>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-end">
+                    <!-- ВМЕСТО 12,008 подставляем наше значение -->
+                    <h3 class="text-dark my-1"><span data-plugin="counterup">{{ total_markets }}</span></h3>
+                    <!-- Меняем подпись на русскую -->
+                    <p class="text-muted mb-0 text-truncate">{% trans 'Total Markets' %}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-lg-6 col-xl-3">
+          <div class="card bg-pattern">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-6">
+                  <div class="avatar-md bg-success rounded">
+                    <i class="fe-star avatar-title font-22 text-white"></i>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-end">
+                    <h3 class="text-dark my-1"><span data-plugin="counterup">{{ total_reviews }}</span></h3>
+                    <p class="text-muted mb-0 text-truncate">{% trans 'Total Reviews' %}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+          <div class="card bg-pattern">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-6">
+                  <div class="avatar-md bg-danger rounded">
+                    <i class="fe-flag avatar-title font-22 text-white"></i>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-end">
+                    <h3 class="text-dark my-1"><span data-plugin="counterup">{{ states_count }}</span></h3>
+                    <p class="text-muted mb-0 text-truncate">{% trans 'States in DB' %}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+          <div class="card bg-pattern">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-6">
+                  <div class="avatar-md bg-warning rounded">
+                    <i class="fe-map-pin avatar-title font-22 text-white"></i>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="text-end">
+                    <!-- Убираем знак $ и k — оставляем чистое число -->
+                    <h3 class="text-dark my-1"><span data-plugin="counterup">{{ cities_count }}</span></h3>
+                    <p class="text-muted mb-0 text-truncate">{% trans 'Cities in DB' %}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- Один РЯД с двумя колонками: слева бар, справа пай -->
+      <div class="row g-3">
+        <!-- ЛЕВАЯ колонка: ТОП-10 штатов (ровно половина ширины на xl+) -->
+        <div class="col-12 col-lg-6 col-xl-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="card-widgets">
+                <a href="javascript:void(0)" data-bs-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                <a data-bs-toggle="collapse" href="#cardCollapseBar" role="button" aria-expanded="true" aria-controls="cardCollapseBar"><i class="mdi mdi-minus"></i></a>
+                <a href="javascript:void(0)" data-bs-toggle="remove"><i class="mdi mdi-close"></i></a>
+              </div>
+              <h4 class="header-title mb-0">{% trans 'TOP-10 States by Number of Markets' %}</h4>
+
+              <div id="cardCollapseBar" class="collapse show" dir="ltr">
+                <!-- КОНТЕЙНЕР APEX BAR. ВАЖНО: все data-* в ОТКРЫВАЮЩЕМ теге -->
+                <div id="apex-bar-1"
+                    class="apex-charts pt-3"
+                    data-colors="#1abc9c"
+                    data-series='{{ top_states_values|safe }}'
+                    data-categories='{{ top_states_labels|safe }}'>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /col -->
+
+        <!-- ПРАВАЯ колонка: распределение по категориям (ровно половина ширины на xl+) -->
+        <div class="col-12 col-lg-6 col-xl-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="card-widgets">
+                <a href="javascript:void(0)" data-bs-toggle="reload"><i class="mdi mdi-refresh"></i></a>
+                <a data-bs-toggle="collapse" href="#cardCollapsePie" role="button" aria-expanded="true" aria-controls="cardCollapsePie"><i class="mdi mdi-minus"></i></a>
+                <a href="javascript:void(0)" data-bs-toggle="remove"><i class="mdi mdi-close"></i></a>
+              </div>
+              <h4 class="header-title mb-0">{% trans 'Markets by Category Distribution' %}</h4>
+
+              <div id="cardCollapsePie" class="collapse show" dir="ltr">
+              <!-- ВАЖНО: все data-* — в ОТКРЫВАЮЩЕМ теге -->
+              <!-- Контейнер Flot Pie: атрибуты ДОЛЖНЫ быть в ОТКРЫВАЮЩЕМ теге -->
+              <!-- Распределение рынков по категориям (Flot Pie) -->
+              <div id="pie-chart"
+                  class="flot-chart pt-3"
+                  style="height: 400px;"
+                  data-colors="#4a81d4,#f672a7,#f7b84b,#4fc6e1,#1abc9c"
+                  data-labels='{{ cat_labels|safe }}'
+                  data-values='{{ cat_values|safe }}'>
+              </div>
+              <!-- Подсказка: комментарии размещаем ВНЕ тега, как эта строка -->
+            </div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+
+  </div>
+
+{% endblock %}
+
+{% block scripts_extra %}
+  <!-- Для бара слева -->
+  <script src="{% static 'assets/libs/apexcharts/apexcharts.min.js' %}"></script>
+  <script src="{% static 'assets/js/pages/apexcharts.dynamic.js' %}"></script>
+
+  <!-- Для Pie справа: библиотека Flot + наш рендер -->
+  <script src="{% static 'assets/libs/flot-charts/jquery.flot.js' %}"></script>
+  <script src="{% static 'assets/libs/flot-charts/jquery.flot.pie.js' %}"></script>
+  <script src="{% static 'assets/libs/jquery.flot.tooltip/js/jquery.flot.tooltip.min.js' %}"></script>
+  <script src="{% static 'assets/js/pages/flot.pie.dynamic.js' %}"></script>
+
+{% endblock %}
