@@ -1,73 +1,23 @@
 # web/markets/views.py
 
 from math import ceil
-from typing import Optional
 
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
-
 from .db import execute_query
 from .utils import validate_coordinates
 from django.db import connection  # даёт доступ к "сырым" SQL-запросам
 import json  # нужен для превращения Python-списков в JSON для JS в шаблоне
-
-from django.contrib.auth.decorators import login_required, user_passes_test
-
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login as auth_login
+from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import Group  # нужен, чтобы добавить нового юзера в группу "Пользователи"
 from django.contrib.auth.decorators import permission_required
-
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 
-@login_required
-def update_account(request):
-    """
-    Простой вариант обновления профиля без отдельной формы.
-    Проверяет:
-    1. Совпадение введённых паролей.
-    2. Уникальность имени пользователя.
-    """
-    user = request.user
-
-    if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        email = request.POST.get("email", "").strip()
-        password1 = request.POST.get("password1", "").strip()
-        password2 = request.POST.get("password2", "").strip()
-
-        # Проверка уникальности имени (если меняем)
-        if username and username != user.username:
-            if User.objects.filter(username=username).exclude(pk=user.pk).exists():
-                messages.error(request, "Имя пользователя уже занято.")
-                return redirect("markets:home")
-
-        # Проверка совпадения паролей
-        if password1 or password2:
-            if password1 != password2:
-                messages.error(request, "Пароли не совпадают.")
-                return redirect("markets:home")
-            else:
-                user.set_password(password1)
-                update_session_auth_hash(request, user)
-
-        # Обновляем имя и почту
-        user.username = username or user.username
-        user.email = email
-        user.save()
-
-        messages.success(request, "Профиль успешно обновлён.")
-        return redirect("markets:home")
-
-    return redirect("markets:home")
-
-
-def test_pass ():
-    pass
+from django.http import JsonResponse  # ← добавь этот импорт наверху файла
 
 
 def is_admin(user):

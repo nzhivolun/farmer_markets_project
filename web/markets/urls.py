@@ -20,6 +20,4 @@ urlpatterns = [
     path("by_category/", views.markets_by_category, name="by_category"),
     path("register/", views.register, name="register"),
     path("delete_review/", views.delete_review, name="delete_review"),
-    path("update_account/", views.update_account, name="update_account"),
-
 ]
