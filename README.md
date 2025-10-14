@@ -89,36 +89,36 @@ docker compose exec -it farmer_django sh -lc "python /web/manage.py createsuperu
 docker compose down
 ```
 
-### Windows
+### Windows, предварительно перейдите в папку /exe
 Консольная версия:
 ```bat
-exe/start_app.bat
+start_app.bat
 ```
 
 Веб-версия (Streamlit):
 ```bat
-exe/start_app-streamlit.bat
+start_app-streamlit.bat
 ```
 
 Веб-приложение (Django):
 ```bat
-exe/start_app-django.bat
+start_app-django.bat
 ```
 
 ---
 
-### Linux / macOS
+### Linux / macOS, предварительно перейдите в папку /exe
 ```bash
 chmod +x exe/start_app.sh         # консольная версия
-./exe/start_app.sh
+./start_app.sh
 ```
 ```bash
 chmod +x exe/start_app-streamlit.sh    # веб-версия Streamlit
-./exe/start_app-streamlit.sh
+./start_app-streamlit.sh
 ```
 ```bash
 chmod +x exe/start_app-django.sh    # веб-приложение django
-./exe/start_app-django.sh
+./start_app-django.sh
 ```
 
 После запуска Streamlit откроется по адресу:  
