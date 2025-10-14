@@ -91,7 +91,6 @@ chmod +x create_django_superuser.sh   # один раз
 
 > Если при запуске .sh-скрипта видишь ошибку про CRLF — переведи файл в LF (например, через git config core.autocrlf input или в редакторе).
 
-```
 ## Вариант B — вручную одной командой
 ### Windows (PowerShell / CMD)
 ```bat
@@ -105,20 +104,8 @@ docker compose exec -it farmer_django sh -lc 'python /app/web/manage.py createsu
 
 ### Примечание: имена сервисов смотри в docker-compose.yml (по умолчанию farmer_django).
 
-### Остановка
-```bat
-docker compose down          # остановить все сервисы
-# docker compose down -v     # (опционально) удалить тома БД/кэш — очистит данные
-```
-
-
 ## Запуск программы
 ### Windows, предварительно перейдите в папку /exe
-- Откройте CMD/PowerShell, затем:
-```bat
-cd /d path\to\project\exe
-
-```
 
 ### Консольная версия:
 ```bat
@@ -128,6 +115,7 @@ start_app.bat
 ### Веб-версия (Streamlit):
 ```bat
 start_app-streamlit.bat
+```
 
 ### Веб-приложение (Django):
 ```bat
