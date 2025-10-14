@@ -120,6 +120,7 @@ start_app-streamlit.bat
 ### Веб-приложение (Django):
 ```bat
 start_app-django.bat
+```
 ---
 
 🐧 Linux / macOS (скрипты в exe/)
