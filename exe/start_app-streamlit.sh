@@ -15,14 +15,14 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
-    echo "docker-compose не найден! Установите: https://docs.docker.com/compose/install/"
+if ! docker compose version &>/dev/null; then
+    echo "Docker Compose v2 не найден. Установите плагин: sudo apt install -y docker-compose-plugin"
     exit 1
 fi
 
 # --- Запускаем контейнеры ---
 echo "Сборка и запуск контейнеров..."
-docker-compose up --build -d
+docker compose up --build -d
 
 # --- Ждём запуск базы данных ---
 echo "Ожидание запуска базы данных..."

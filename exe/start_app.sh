@@ -23,15 +23,16 @@ then
     exit
 fi
 
-# === 1.1 Проверка, установлен ли docker-compose ===
-if ! command -v docker-compose &> /dev/null; then
-    echo "docker-compose не найден! Установите его: https://docs.docker.com/compose/install/"
+# === 1.1 Проверка, установлен ли Docker Compose v2 ===
+if ! docker compose version &>/dev/null; then
+    echo "Docker Compose v2 не найден. Установите плагин: sudo apt install -y docker-compose-plugin"
     exit 1
 fi
 
 # === 2. Запускаем контейнеры через docker-compose ===
 echo "Сборка и запуск контейнеров..."
-docker-compose up --build -d
+docker compose up --build -d
+
 # --build — пересобирает образы, если изменились файлы (Dockerfile, requirements и т.д.)
 # -d — запускает контейнеры в фоновом режиме (detached mode).
 
