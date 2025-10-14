@@ -4,7 +4,7 @@
 services:
   # ====================== PostgreSQL ======================
   farmer_db:                                   # имя сервиса БД
-    image: postgres:15
+    image: postgres:16
     container_name: farmer_db           # удобное имя контейнера
     restart: always
     environment:
@@ -40,6 +40,8 @@ services:
   # ====================== Django ======================
   farmer_django:
     build: .
+    ports:
+      - "8502:8502"
     container_name: farmer_django
     restart: always
     depends_on:
@@ -48,7 +50,7 @@ services:
       DJANGO_SETTINGS_MODULE: fm_project.settings
       PYTHONUNBUFFERED: "1"
       DEBUG: "1"
-      ALLOWED_HOSTS: "127.0.0.1,localhost"
+      ALLOWED_HOSTS: "127.0.0.1,localhost,192.168.1.111"
       DB_HOST: farmer_db
       DB_PORT: 5432
       DB_NAME: farmer_markets
@@ -63,8 +65,7 @@ services:
     volumes:
       - .:/app                            # чтобы был доступен /app/entrypoint.sh
       - ./web:/web                        # чтобы /web/manage.py был внутри контейнера
-    ports:
-      - "8502:8502"
+    
 
 # ====================== Volume для БД ======================
 volumes:

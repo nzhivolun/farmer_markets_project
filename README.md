@@ -109,16 +109,16 @@ exe/start_app-django.bat
 
 ### Linux / macOS
 ```bash
-chmod +x start_app.sh
-exe/start_app.sh              # консольная версия
+chmod +x exe/start_app.sh         # консольная версия
+./exe/start_app.sh
 ```
 ```bash
-chmod +x start_app-streamlit.sh
-exe/start_app-streamlit.sh    # веб-версия Streamlit
+chmod +x exe/start_app-streamlit.sh    # веб-версия Streamlit
+./exe/start_app-streamlit.sh
 ```
 ```bash
-chmod +x start_app-django.sh
-exe/start_app-django.sh    # веб-приложение django
+chmod +x exe/start_app-django.sh    # веб-приложение django
+./exe/start_app-django.sh
 ```
 
 После запуска Streamlit откроется по адресу:  
