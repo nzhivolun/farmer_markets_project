@@ -1,15 +1,5 @@
+# setup/config.py
 import os
-
-# # Настройки подключения к PostgreSQL
-# DB_CONFIG = {
-#     "host": "localhost",
-#     "port": 5432,
-#     "database": "farmer_markets",  # Создадим базу с таким именем
-#     "user": "postgres",            # Админский логин
-#     "password": ""      # Админский пароль
-# }
-
-
 # Читаем настройки из переменных окружения (если их нет — используем значения по умолчанию)
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),

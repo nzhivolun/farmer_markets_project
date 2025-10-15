@@ -1,5 +1,5 @@
 # docker-compose.yml
-# Простой и понятный compose без поля "version" (оно устарело).
+# Простой и понятный compose.
 
 services:
   # ====================== PostgreSQL ======================
@@ -16,7 +16,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data # volume для сохранности данных
 
-  # ====================== Streamlit (как было) ======================
+  # ====================== Streamlit ======================
   app:
     build: .
     container_name: farmer_app
